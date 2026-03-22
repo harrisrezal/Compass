@@ -46,7 +46,7 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "GCP_PROJECT_ID=${{ env.PROJECT_ID }},BQ_DATASET=vitaguard,BQ_LOCATION=us-central1,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
+            --set-env-vars "GCP_PROJECT_ID=${{ env.PROJECT_ID }},BQ_DATASET=vitaguard,BQ_LOCATION=us-central1,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" \
             --project ${{ env.PROJECT_ID }}
 
   deploy-frontend:
@@ -76,6 +76,7 @@ jobs:
           IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/cloud-run-source-deploy/compass-frontend:${{ github.sha }}
           docker build \
             --build-arg NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_URL }} \
+            --build-arg NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }} \
             -f frontend/caregiver-app/Dockerfile \
             frontend/caregiver-app \
             -t $IMAGE
@@ -89,5 +90,5 @@ jobs:
             --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
+            --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }},NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${{ secrets.GOOGLE_MAPS_API_KEY }}" \
             --project ${{ env.PROJECT_ID }}
