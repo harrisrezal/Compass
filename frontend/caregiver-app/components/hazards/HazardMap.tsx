@@ -54,7 +54,12 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
       return;
     }
 
-    setOptions({ key: apiKey, v: "weekly" });
+    // setOptions must only be called before the Maps script loads.
+    // Guard against double-init (e.g. client-side navigation between pages
+    // that both render HazardMap).
+    if (typeof window !== "undefined" && !window.google?.maps) {
+      setOptions({ key: apiKey, v: "weekly" });
+    }
 
     Promise.all([
       importLibrary("maps"),
