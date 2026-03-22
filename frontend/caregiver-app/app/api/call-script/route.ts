@@ -1,64 +1,44 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
-const PURPOSE_PROMPTS: Record<string, string> = {
-  welfare_check: `You are placing a friendly routine welfare check call. Tone: warm, conversational, unhurried.
-Cover: (1) greet and check how they are feeling, (2) briefly mention the current risk level and what it means for them, (3) remind them of their nearest support organisations, (4) ask if they want you to connect them to 911.`,
-
-  risk_alert: `You are placing an urgent risk alert call. Tone: calm but direct — this is serious.
-Cover: (1) state their risk score and the primary threat clearly, (2) give exactly 3 numbered action steps tailored to their condition and equipment, (3) name their connected organisations with contact details, (4) ask if they want you to connect them to 911 right now.`,
-
-  evacuation_warning: `You are placing an emergency evacuation warning call. Tone: urgent, clear, directive.
-Cover: (1) state there is an active emergency (Red Flag / PSPS / flood warning), (2) instruct them to prepare to leave now and what to bring (equipment, medications), (3) give the address of their nearest shelter or cooling centre by name, (4) tell them their equipment supplier's emergency line, (5) ask if they want you to connect them to 911 immediately.`,
-};
-
 export async function POST(req: NextRequest) {
-  const { purpose, customNote, patient, score } = await req.json();
+  const { patient, score, caregiver } = await req.json();
 
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
   }
 
-  const purposePrompt = PURPOSE_PROMPTS[purpose];
-  if (!purposePrompt) {
-    return NextResponse.json({ error: "Invalid call purpose" }, { status: 400 });
-  }
-
   const eq = patient.equipment ?? {};
   const nr = patient.nearest_resources ?? {};
-  const meds = (patient.medications ?? []).map((m: { name?: string }) => m.name).join(", ") || "None";
 
-  const systemPrompt = `You are Compass, an AI emergency preparedness agent. You are calling ${patient.name} directly.
-${purposePrompt}
+  const THREAT_LABELS: Record<string, string> = {
+    grid: "power grid outage",
+    heat: "extreme heat event",
+    wildfire: "wildfire and smoke",
+    flood: "flooding",
+    none: "environmental hazard",
+  };
+  const threatLabel = THREAT_LABELS[score?.primary_threat ?? "none"] ?? "environmental hazard";
 
-## Patient context
-- Name: ${patient.name} (address them by first name only)
-- Age: ${patient.age ?? "unknown"}
-- Condition: ${patient.condition}
-- Equipment: ${eq.type ?? "unknown"} drawing ${eq.power_watts ?? "?"}W
-- Medications: ${meds}
-- Can self-evacuate: ${patient.can_self_evacuate ? "Yes" : "No — needs assistance"}
+  const systemPrompt = `You are Compass, an AI emergency preparedness assistant. You are making an urgent outbound call to ${caregiver.name}, the registered emergency contact for ${patient.name}.
 
-## Current risk
-- Risk score: ${score?.composite_score ?? "unknown"}/100
-- Level: ${score?.risk_level ?? "unknown"}
-- Primary threat: ${score?.primary_threat ?? "unknown"}
-- Hours to action: ${score?.hours_to_action ?? "unknown"}
+## Situation
+${patient.name} has NOT responded to an automated risk alert sent by Compass. Their current risk score is ${score?.composite_score ?? "unknown"}/100 (${score?.risk_level ?? "unknown"}) due to an upcoming ${threatLabel} in their area (ZIP ${patient.zip_code}).
 
-## Connected organisations
-- Hospital: ${nr.hospital_name ?? "unknown"} (${nr.hospital_miles ?? "?"}mi away)
-- Cooling centre: ${nr.cooling_center ?? "unknown"}
-- Equipment supplier: ${eq.supplier_name ?? "unknown"} — ${eq.supplier_phone ?? "contact your provider"}
-- Pharmacy: ${nr.pharmacy_name ?? "unknown"}
+## Your goal
+Inform the caregiver clearly and calmly about:
+1. That ${patient.name} has not responded to the alert
+2. The nature and urgency of the upcoming ${threatLabel} — estimated ${score?.hours_to_action ?? "unknown"} hours until action is needed
+3. Why this is specifically dangerous for ${patient.name} given their condition (${patient.condition}) and equipment (${eq.type ?? "unknown"})
+4. Two immediate actions the caregiver should take right now
+5. Key contacts: ${nr.hospital_name ?? "nearest hospital"} (${nr.hospital_miles ?? "?"}mi) and equipment supplier ${eq.supplier_name ?? "their supplier"} at ${eq.supplier_phone ?? "their listed number"}
 
-${customNote ? `## Additional instruction from caregiver\n${customNote}` : ""}
-
-## Rules
-- Speak naturally as if on a phone call — no markdown, no bullet points in the output
-- Keep the script under 200 words
-- End by asking: "Would you like me to connect you to 911 emergency services right now?"
-- Do NOT include stage directions or labels like "Agent:" — just the spoken words`;
+## Script rules
+- Open with: "Hi ${caregiver.name}, this is Compass, ${patient.name}'s emergency preparedness assistant."
+- Speak naturally — no markdown, no bullet points, no stage directions
+- Keep under 200 words
+- End by asking: "Would you like me to connect you to 911 emergency services right now?"`;
 
   try {
     const genai = new GoogleGenerativeAI(apiKey);
