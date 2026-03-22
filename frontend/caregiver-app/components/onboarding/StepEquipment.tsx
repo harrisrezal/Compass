@@ -30,7 +30,7 @@ export default function StepEquipment({ data, onChange }: Props) {
             value={eq.type ?? ""}
             onChange={(e) => update("type", e.target.value)}
             placeholder="Oxygen concentrator (5L/min)"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -42,7 +42,7 @@ export default function StepEquipment({ data, onChange }: Props) {
             onChange={(e) => update("power_watts", parseInt(e.target.value) || 0)}
             placeholder="300"
             min={0}
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -58,7 +58,7 @@ export default function StepEquipment({ data, onChange }: Props) {
             placeholder="4"
             min={0}
             step={0.5}
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -69,7 +69,7 @@ export default function StepEquipment({ data, onChange }: Props) {
             value={eq.supplier_name ?? ""}
             onChange={(e) => update("supplier_name", e.target.value)}
             placeholder="AeroCare Medical"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -80,7 +80,7 @@ export default function StepEquipment({ data, onChange }: Props) {
             value={eq.supplier_phone ?? ""}
             onChange={(e) => update("supplier_phone", e.target.value)}
             placeholder="1-800-232-7263"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>

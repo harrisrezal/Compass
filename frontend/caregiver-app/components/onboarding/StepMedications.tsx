@@ -45,7 +45,7 @@ export default function StepMedications({ data, onChange }: Props) {
                 value={med.name ?? ""}
                 onChange={(e) => update(i, { name: e.target.value })}
                 placeholder="Medication name"
-                className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 type="button"

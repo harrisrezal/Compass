@@ -33,7 +33,7 @@ export default function StepBasicInfo({ data, onChange }: Props) {
             value={data.name ?? ""}
             onChange={(e) => onChange({ name: e.target.value })}
             placeholder="Margaret Rodriguez"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -46,7 +46,7 @@ export default function StepBasicInfo({ data, onChange }: Props) {
             placeholder="74"
             min={0}
             max={120}
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -58,7 +58,7 @@ export default function StepBasicInfo({ data, onChange }: Props) {
             onChange={(e) => onChange({ zip_code: e.target.value })}
             placeholder="93720"
             maxLength={5}
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -67,7 +67,7 @@ export default function StepBasicInfo({ data, onChange }: Props) {
           <select
             value={data.utility ?? ""}
             onChange={(e) => onChange({ utility: e.target.value as UserProfileCreate["utility"] })}
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             <option value="">Select utility</option>
             {UTILITIES.map((u) => <option key={u} value={u}>{u}</option>)}
@@ -79,7 +79,7 @@ export default function StepBasicInfo({ data, onChange }: Props) {
           <select
             value={data.preferred_language ?? "en"}
             onChange={(e) => onChange({ preferred_language: e.target.value })}
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
           >
             {LANGUAGES.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
           </select>
