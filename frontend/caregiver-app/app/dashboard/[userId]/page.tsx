@@ -139,6 +139,44 @@ interface GeminiPlan {
   items: Array<{ action: string; detail: string }>;
 }
 
+async function generateHazardInsights(
+  hazards: Record<string, { level: string; label: string; reasoning?: string }>,
+  profile: UserProfile,
+): Promise<Record<string, string>> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return {};
+
+  const nonLow = Object.entries(hazards).filter(([, h]) => h.level !== "LOW");
+  if (nonLow.length === 0) return {};
+
+  const eq = profile.equipment ?? {};
+  const hazardLines = nonLow
+    .map(([key, h]) => `${key.toUpperCase()} (${h.level}): "${h.reasoning ?? h.label}"`)
+    .join("\n");
+
+  const prompt = `You are Compass, an AI emergency assistant for medically vulnerable Californians.
+
+Patient: ${profile.name}, condition: ${profile.condition ?? "unknown"}, equipment: ${eq.type ?? "none"}
+
+For each active hazard below, rewrite the technical reasoning as ONE plain-English sentence that explains the risk to this specific patient. Be direct and patient-focused.
+
+${hazardLines}
+
+Return ONLY valid JSON with hazard keys in lowercase: ${JSON.stringify(Object.fromEntries(nonLow.map(([k]) => [k, "..."])))}`;
+
+  try {
+    const genai = new GoogleGenerativeAI(apiKey);
+    const model = genai.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: { responseMimeType: "application/json" },
+    });
+    const result = await model.generateContent(prompt);
+    return JSON.parse(result.response.text().trim()) as Record<string, string>;
+  } catch {
+    return {};
+  }
+}
+
 async function generateActionPlan(
   hazards: Record<string, { level: string; label: string }>,
   profile: UserProfile,
@@ -204,9 +242,12 @@ export default async function DashboardPage({ params }: Props) {
   const hazardData: HazardResponse =
     hazardResult ?? (DEMO_HAZARDS[userId] ?? DEMO_HAZARDS["demo-user-margaret-001"]);
 
-  // Generate Gemini action plan based on live hazard data + medical profile
+  // Generate Gemini outputs in parallel
   const lastUpdated = hazardData.last_updated ?? new Date().toISOString();
-  const geminiPlan = await generateActionPlan(hazardData.hazards, profile, lastUpdated);
+  const [geminiPlan, hazardInsights] = await Promise.all([
+    generateActionPlan(hazardData.hazards, profile, lastUpdated),
+    generateHazardInsights(hazardData.hazards, profile),
+  ]);
 
   // Build ActionPlan from Gemini output (or fall back to static demo plan)
   const plan: ActionPlan = geminiPlan
@@ -284,7 +325,15 @@ export default async function DashboardPage({ params }: Props) {
         </div>
 
         {/* Hazard status cards — full width */}
-        <HazardStatusGrid hazards={hazardData.hazards} lastUpdated={lastUpdated} />
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-700">Hazard Status</h2>
+            <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1 rounded-full font-medium">
+              🛡️ Monitoring next 72 hours
+            </span>
+          </div>
+          <HazardStatusGrid hazards={hazardData.hazards} lastUpdated={lastUpdated} hazardInsights={hazardInsights} />
+        </div>
 
         {/* Map + sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
