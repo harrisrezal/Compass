@@ -1,0 +1,44 @@
+[
+  {
+    "name": "ingested_at",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "When this row was written to BigQuery"
+  },
+  {
+    "name": "forecast_hour",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "The hour this grid reading applies to"
+  },
+  {
+    "name": "load_mw",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Actual or forecast system load in megawatts"
+  },
+  {
+    "name": "capacity_mw",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Available generation capacity in megawatts"
+  },
+  {
+    "name": "stress_pct",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Grid stress as percentage: load_mw / capacity_mw * 100"
+  },
+  {
+    "name": "renewable_pct",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Percentage of supply from renewable sources"
+  },
+  {
+    "name": "flex_alert_active",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether a CAISO Flex Alert is currently in effect"
+  }
+]

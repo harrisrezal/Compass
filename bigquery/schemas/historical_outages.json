@@ -1,0 +1,32 @@
+[
+  {
+    "name": "zip_code",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "5-digit ZIP code"
+  },
+  {
+    "name": "outage_count",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": "Number of outages recorded 2019-2024"
+  },
+  {
+    "name": "avg_duration_hrs",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Average outage duration in hours"
+  },
+  {
+    "name": "psps_count",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": "Number of Public Safety Power Shutoffs recorded 2019-2024"
+  },
+  {
+    "name": "risk_tier",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Derived risk tier: LOW, MEDIUM, HIGH, VERY_HIGH"
+  }
+]

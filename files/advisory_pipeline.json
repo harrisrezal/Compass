@@ -1,0 +1,74 @@
+{
+  "name": "compass-advisory-pipeline",
+  "version": "1.0",
+  "description": "Generates personalised Gemini action plans when risk threshold is crossed",
+  "trigger": "event",
+  "event": "score_threshold_crossed",
+  "nodes": [
+    {
+      "id": "user-fetch",
+      "type": "python",
+      "label": "Fetch user profile",
+      "script": "scoring/advisory.py",
+      "function": "fetch_user_profile",
+      "inputs": ["user_id"],
+      "outputs": ["user_profile"]
+    },
+    {
+      "id": "score-fetch",
+      "type": "python",
+      "label": "Fetch latest risk score",
+      "script": "scoring/advisory.py",
+      "function": "fetch_latest_score",
+      "inputs": ["user_id"],
+      "outputs": ["risk_score"]
+    },
+    {
+      "id": "equipment-lookup",
+      "type": "python",
+      "label": "Look up equipment specs",
+      "script": "scoring/advisory.py",
+      "function": "get_equipment_specs",
+      "inputs": ["user_profile"],
+      "outputs": ["equipment_specs"]
+    },
+    {
+      "id": "gemini-advisory",
+      "type": "python",
+      "label": "Generate Gemini action plan",
+      "script": "scoring/advisory.py",
+      "function": "generate_action_plan",
+      "inputs": ["user_profile", "risk_score", "equipment_specs"],
+      "outputs": ["action_plan"],
+      "config": {
+        "model": "gemini-1.5-pro",
+        "max_tokens": 1000,
+        "language_aware": true
+      }
+    },
+    {
+      "id": "plan-store",
+      "type": "python",
+      "label": "Store plan to Firestore",
+      "script": "scoring/advisory.py",
+      "function": "store_action_plan",
+      "inputs": ["action_plan"]
+    },
+    {
+      "id": "notify",
+      "type": "python",
+      "label": "Send alert + notify caregiver",
+      "script": "scoring/advisory.py",
+      "function": "send_notifications",
+      "inputs": ["user_profile", "risk_score", "action_plan"]
+    }
+  ],
+  "edges": [
+    { "from": "user-fetch", "to": "equipment-lookup" },
+    { "from": "user-fetch", "to": "gemini-advisory" },
+    { "from": "score-fetch", "to": "gemini-advisory" },
+    { "from": "equipment-lookup", "to": "gemini-advisory" },
+    { "from": "gemini-advisory", "to": "plan-store" },
+    { "from": "gemini-advisory", "to": "notify" }
+  ]
+}

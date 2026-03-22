@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UserProfile",
+  "type": "object",
+  "required": ["user_id", "name", "zip_code", "condition", "equipment", "caregiver"],
+  "properties": {
+    "user_id": { "type": "string", "format": "uuid" },
+    "name": { "type": "string" },
+    "age": { "type": "integer" },
+    "zip_code": { "type": "string" },
+    "utility": { "type": "string", "enum": ["PGE", "SCE", "SDGE", "OTHER"] },
+    "medical_baseline_enrolled": { "type": "boolean" },
+    "condition": { "type": "string", "enum": ["oxygen", "dialysis", "wheelchair", "ventilator", "heat_vulnerable", "insulin_dependent", "other"] },
+    "equipment": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string" },
+        "power_watts": { "type": "integer" },
+        "backup_hours": { "type": "number" },
+        "supplier_name": { "type": "string" },
+        "supplier_phone": { "type": "string" }
+      }
+    },
+    "medications": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "requires_refrigeration": { "type": "boolean" },
+          "heat_sensitive": { "type": "boolean" },
+          "beta_blocker": { "type": "boolean" }
+        }
+      }
+    },
+    "can_self_evacuate": { "type": "boolean" },
+    "preferred_language": { "type": "string", "default": "en" },
+    "caregiver": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "relationship": { "type": "string" },
+        "phone": { "type": "string" },
+        "email": { "type": "string" },
+        "notify_threshold": { "type": "string", "enum": ["ELEVATED", "HIGH", "CRITICAL"] }
+      }
+    },
+    "nearest_resources": {
+      "type": "object",
+      "properties": {
+        "hospital_name": { "type": "string" },
+        "hospital_miles": { "type": "number" },
+        "cooling_center": { "type": "string" },
+        "pharmacy_name": { "type": "string" }
+      }
+    }
+  }
+}

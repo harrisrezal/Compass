@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-03-22",
+  "equipment": [
+    { "type": "oxygen", "name": "Oxygen concentrator (5L/min)", "watts_min": 150, "watts_typical": 300, "watts_max": 600, "continuous": true, "criticality": "HIGH" },
+    { "type": "ventilator", "name": "Home mechanical ventilator", "watts_min": 150, "watts_typical": 250, "watts_max": 350, "continuous": true, "criticality": "CRITICAL" },
+    { "type": "ventilator", "name": "BiPAP / CPAP", "watts_min": 30, "watts_typical": 55, "watts_max": 120, "continuous": false, "criticality": "HIGH" },
+    { "type": "dialysis", "name": "Home hemodialysis machine", "watts_min": 100, "watts_typical": 200, "watts_max": 300, "continuous": false, "criticality": "HIGH" },
+    { "type": "wheelchair", "name": "Power wheelchair (charging)", "watts_min": 150, "watts_typical": 250, "watts_max": 400, "continuous": false, "criticality": "HIGH" },
+    { "type": "insulin", "name": "Insulin refrigerator", "watts_min": 30, "watts_typical": 45, "watts_max": 60, "continuous": true, "criticality": "MEDIUM" },
+    { "type": "infusion", "name": "Infusion pump", "watts_min": 10, "watts_typical": 20, "watts_max": 30, "continuous": true, "criticality": "HIGH" },
+    { "type": "suction", "name": "Suction machine", "watts_min": 50, "watts_typical": 100, "watts_max": 150, "continuous": false, "criticality": "HIGH" },
+    { "type": "hvac", "name": "Window AC unit", "watts_min": 500, "watts_typical": 1200, "watts_max": 1800, "continuous": false, "criticality": "MEDIUM" },
+    { "type": "nebulizer", "name": "Nebulizer / compressor", "watts_min": 50, "watts_typical": 100, "watts_max": 200, "continuous": false, "criticality": "MEDIUM" }
+  ]
+}

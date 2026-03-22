@@ -1,0 +1,15 @@
+{
+  "version": "1.0",
+  "source": "CPUC outage reporting data 2019-2024",
+  "lookup": {
+    "93720": { "outage_count": 4, "avg_duration_hrs": 3.2, "psps_count": 2, "risk_tier": "HIGH" },
+    "93722": { "outage_count": 3, "avg_duration_hrs": 2.8, "psps_count": 1, "risk_tier": "MEDIUM" },
+    "93706": { "outage_count": 2, "avg_duration_hrs": 2.1, "psps_count": 0, "risk_tier": "MEDIUM" },
+    "95969": { "outage_count": 8, "avg_duration_hrs": 6.4, "psps_count": 5, "risk_tier": "VERY_HIGH" },
+    "95928": { "outage_count": 3, "avg_duration_hrs": 2.5, "psps_count": 1, "risk_tier": "MEDIUM" },
+    "94025": { "outage_count": 1, "avg_duration_hrs": 1.2, "psps_count": 0, "risk_tier": "LOW" },
+    "90034": { "outage_count": 1, "avg_duration_hrs": 0.8, "psps_count": 0, "risk_tier": "LOW" },
+    "92103": { "outage_count": 1, "avg_duration_hrs": 0.9, "psps_count": 0, "risk_tier": "LOW" },
+    "95814": { "outage_count": 2, "avg_duration_hrs": 1.5, "psps_count": 0, "risk_tier": "LOW" }
+  }
+}

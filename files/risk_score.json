@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RiskScore",
+  "type": "object",
+  "required": ["score_id", "user_id", "timestamp", "composite_score", "risk_level"],
+  "properties": {
+    "score_id": { "type": "string" },
+    "user_id": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "forecast_window_hrs": { "type": "integer", "default": 72 },
+    "composite_score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "risk_level": { "type": "string", "enum": ["LOW", "MODERATE", "ELEVATED", "HIGH", "CRITICAL"] },
+    "primary_threat": { "type": "string", "enum": ["grid", "heat", "wildfire", "flood", "none"] },
+    "hours_to_action": { "type": "integer" },
+    "contributing_factors": {
+      "type": "object",
+      "properties": {
+        "grid_stress_score": { "type": "number" },
+        "heat_index_score": { "type": "number" },
+        "wildfire_psps_score": { "type": "number" },
+        "flood_risk_score": { "type": "number" },
+        "historical_risk_score": { "type": "number" }
+      }
+    },
+    "raw_inputs": {
+      "type": "object",
+      "properties": {
+        "caiso_stress_pct": { "type": "number" },
+        "temp_forecast_f": { "type": "number" },
+        "heat_index_f": { "type": "number" },
+        "has_red_flag_warning": { "type": "boolean" },
+        "active_psps": { "type": "boolean" },
+        "fema_flood_zone": { "type": "string" },
+        "historical_outage_count": { "type": "integer" }
+      }
+    },
+    "persona_multiplier": { "type": "number" },
+    "vertex_ai_prediction": { "type": "number" },
+    "alert_triggered": { "type": "boolean" }
+  }
+}
