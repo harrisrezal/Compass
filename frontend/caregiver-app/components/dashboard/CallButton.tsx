@@ -14,9 +14,9 @@ export default function CallButton({ patient, score }: Props) {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="bg-green-600 hover:bg-green-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+        className="bg-red-600 hover:bg-red-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
       >
-        📞 Simulate Agent Call
+        📞 Alert Contact
       </button>
       {open && (
         <MockCallModal patient={patient} score={score} onClose={() => setOpen(false)} />
