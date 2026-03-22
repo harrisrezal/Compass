@@ -1,0 +1,12 @@
+{
+  "version": "1.0",
+  "source": "CPUC High Fire Threat District map",
+  "lookup": {
+    "93720": "tier3", "93722": "tier3", "93706": "none", "93721": "none",
+    "95969": "tier3", "95928": "tier2", "95926": "none",
+    "94025": "tier2", "94027": "tier2", "94306": "none",
+    "90034": "none", "90210": "none", "91011": "tier2", "91108": "tier2",
+    "92103": "none", "92037": "tier2", "92130": "none",
+    "95814": "none", "95825": "none", "95831": "none"
+  }
+}

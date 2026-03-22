@@ -1,0 +1,86 @@
+[
+  {
+    "name": "check_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "UUID uniquely identifying this welfare check"
+  },
+  {
+    "name": "user_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "UUID of the user being checked on"
+  },
+  {
+    "name": "triggered_at",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "When this welfare check was initiated"
+  },
+  {
+    "name": "trigger_reason",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "What caused this check: score_threshold, manual, scheduled, no_response"
+  },
+  {
+    "name": "push_sent_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "When a push notification was sent, if applicable"
+  },
+  {
+    "name": "push_acknowledged",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether the user acknowledged the push notification"
+  },
+  {
+    "name": "sms_sent_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "When an SMS was sent, if applicable"
+  },
+  {
+    "name": "sms_response",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The user's SMS reply text, if any"
+  },
+  {
+    "name": "call_initiated_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "When an AI phone call was initiated, if applicable"
+  },
+  {
+    "name": "call_answered",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether the user answered the phone call"
+  },
+  {
+    "name": "call_outcome",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Result of the call: safe, needs_help, no_answer, escalated"
+  },
+  {
+    "name": "ai_transcript",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Full transcript of the AI-conducted welfare call"
+  },
+  {
+    "name": "caregiver_alerted",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether the caregiver was contacted during this check"
+  },
+  {
+    "name": "resolved",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether the welfare check has been resolved"
+  }
+]

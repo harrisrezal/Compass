@@ -1,0 +1,50 @@
+[
+  {
+    "name": "ingested_at",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "When this row was written to BigQuery"
+  },
+  {
+    "name": "alert_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Unique identifier for this alert from the source system"
+  },
+  {
+    "name": "alert_type",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Type of alert: red_flag, psps, evacuation_order, evacuation_warning"
+  },
+  {
+    "name": "zip_codes_affected",
+    "type": "STRING",
+    "mode": "REPEATED",
+    "description": "List of ZIP codes within the alert boundary"
+  },
+  {
+    "name": "severity",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Alert severity level"
+  },
+  {
+    "name": "active",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether the alert is currently active"
+  },
+  {
+    "name": "issued_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "When the alert was originally issued"
+  },
+  {
+    "name": "expires_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "When the alert is scheduled to expire"
+  }
+]

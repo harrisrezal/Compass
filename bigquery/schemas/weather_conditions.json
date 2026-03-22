@@ -1,0 +1,44 @@
+[
+  {
+    "name": "ingested_at",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "When this row was written to BigQuery"
+  },
+  {
+    "name": "zip_code",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "5-digit ZIP code for this weather observation"
+  },
+  {
+    "name": "forecast_hour",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "The hour this weather reading applies to"
+  },
+  {
+    "name": "temp_f",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Temperature in degrees Fahrenheit"
+  },
+  {
+    "name": "heat_index_f",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Feels-like temperature accounting for humidity, in Fahrenheit"
+  },
+  {
+    "name": "humidity_pct",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Relative humidity percentage"
+  },
+  {
+    "name": "wind_speed_mph",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Wind speed in miles per hour"
+  }
+]

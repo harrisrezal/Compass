@@ -1,0 +1,106 @@
+[
+  {
+    "user_id": "demo-user-margaret-001",
+    "name": "Margaret Rodriguez",
+    "age": 74,
+    "zip_code": "93720",
+    "utility": "PGE",
+    "medical_baseline_enrolled": true,
+    "condition": "oxygen",
+    "equipment": {
+      "type": "Oxygen concentrator (5L/min)",
+      "power_watts": 300,
+      "backup_hours": 4.0,
+      "supplier_name": "AeroCare Medical",
+      "supplier_phone": "1-800-232-7263"
+    },
+    "medications": [
+      { "name": "Albuterol inhaler", "requires_refrigeration": false, "heat_sensitive": false, "beta_blocker": false },
+      { "name": "Prednisone", "requires_refrigeration": false, "heat_sensitive": false, "beta_blocker": false }
+    ],
+    "can_self_evacuate": false,
+    "preferred_language": "en",
+    "caregiver": {
+      "name": "Maria Rodriguez",
+      "relationship": "daughter",
+      "phone": "+14155550182",
+      "email": "maria.r@email.com",
+      "notify_threshold": "HIGH"
+    },
+    "nearest_resources": {
+      "hospital_name": "Fresno Community Hospital",
+      "hospital_miles": 1.8,
+      "cooling_center": "Fresno City Hall",
+      "pharmacy_name": "CVS Pharmacy"
+    }
+  },
+  {
+    "user_id": "demo-user-james-002",
+    "name": "James Thornton",
+    "age": 68,
+    "zip_code": "95969",
+    "utility": "PGE",
+    "medical_baseline_enrolled": true,
+    "condition": "ventilator",
+    "equipment": {
+      "type": "Home mechanical ventilator (BiPAP)",
+      "power_watts": 250,
+      "backup_hours": 8.0,
+      "supplier_name": "Lincare Holdings",
+      "supplier_phone": "1-800-284-2006"
+    },
+    "medications": [
+      { "name": "Metoprolol (beta blocker)", "requires_refrigeration": false, "heat_sensitive": false, "beta_blocker": true }
+    ],
+    "can_self_evacuate": false,
+    "preferred_language": "en",
+    "caregiver": {
+      "name": "Sandra Thornton",
+      "relationship": "spouse",
+      "phone": "+15305550294",
+      "email": "sandra.t@email.com",
+      "notify_threshold": "ELEVATED"
+    },
+    "nearest_resources": {
+      "hospital_name": "Adventist Health Feather River",
+      "hospital_miles": 3.2,
+      "cooling_center": "Paradise Community Center",
+      "pharmacy_name": "Rite Aid"
+    }
+  },
+  {
+    "user_id": "demo-user-dorothy-003",
+    "name": "Dorothy Kim",
+    "age": 81,
+    "zip_code": "90034",
+    "utility": "SCE",
+    "medical_baseline_enrolled": true,
+    "condition": "heat_vulnerable",
+    "equipment": {
+      "type": "Air conditioner (window unit)",
+      "power_watts": 1200,
+      "backup_hours": 0.0,
+      "supplier_name": null,
+      "supplier_phone": null
+    },
+    "medications": [
+      { "name": "Atenolol (beta blocker)", "requires_refrigeration": false, "heat_sensitive": false, "beta_blocker": true },
+      { "name": "Lisinopril", "requires_refrigeration": false, "heat_sensitive": false, "beta_blocker": false }
+    ],
+    "can_self_evacuate": true,
+    "preferred_language": "ko",
+    "caregiver": {
+      "name": "David Kim",
+      "relationship": "son",
+      "phone": "+13105550471",
+      "email": "david.k@email.com",
+      "notify_threshold": "HIGH"
+    },
+    "nearest_resources": {
+      "hospital_name": "Cedars-Sinai Medical Center",
+      "hospital_miles": 2.1,
+      "cooling_center": "Culver City Senior Center",
+      "pharmacy_name": "Walgreens"
+    }
+  }
+]

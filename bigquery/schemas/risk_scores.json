@@ -1,0 +1,140 @@
+[
+  {
+    "name": "score_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "UUID uniquely identifying this score record"
+  },
+  {
+    "name": "user_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "UUID of the user this score belongs to"
+  },
+  {
+    "name": "timestamp",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "When this score was calculated"
+  },
+  {
+    "name": "forecast_window_hrs",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": "Hours ahead this score covers (default: 72)"
+  },
+  {
+    "name": "composite_score",
+    "type": "FLOAT",
+    "mode": "REQUIRED",
+    "description": "Final weighted composite risk score 0-100"
+  },
+  {
+    "name": "risk_level",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Categorical risk level: LOW, MODERATE, ELEVATED, HIGH, CRITICAL"
+  },
+  {
+    "name": "primary_threat",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "The dominant contributing threat: grid, heat, wildfire, flood, none"
+  },
+  {
+    "name": "hours_to_action",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": "Estimated hours until protective action is needed"
+  },
+  {
+    "name": "grid_stress_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Normalised grid stress component score 0-100 (weight: 35%)"
+  },
+  {
+    "name": "heat_index_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Normalised heat index component score 0-100 (weight: 25%)"
+  },
+  {
+    "name": "wildfire_psps_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Normalised wildfire/PSPS component score 0-100 (weight: 20%)"
+  },
+  {
+    "name": "flood_risk_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Normalised flood risk component score 0-100 (weight: 10%)"
+  },
+  {
+    "name": "historical_risk_score",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Normalised historical outage component score 0-100 (weight: 10%)"
+  },
+  {
+    "name": "caiso_stress_pct",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Raw CAISO grid stress percentage at time of scoring"
+  },
+  {
+    "name": "temp_forecast_f",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Raw temperature forecast in Fahrenheit"
+  },
+  {
+    "name": "heat_index_f",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Raw heat index in Fahrenheit"
+  },
+  {
+    "name": "has_red_flag_warning",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether a Red Flag Warning was active at time of scoring"
+  },
+  {
+    "name": "active_psps",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether a PSPS event was active at time of scoring"
+  },
+  {
+    "name": "fema_flood_zone",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "FEMA flood zone designation for the user's ZIP code"
+  },
+  {
+    "name": "historical_outage_count",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": "Number of historical outages in the user's ZIP code (2019-2024)"
+  },
+  {
+    "name": "persona_multiplier",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Risk multiplier applied based on medical condition and backup power status"
+  },
+  {
+    "name": "vertex_ai_prediction",
+    "type": "FLOAT",
+    "mode": "NULLABLE",
+    "description": "Time-series forecast boost from Vertex AI AutoML"
+  },
+  {
+    "name": "alert_triggered",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether this score triggered an alert or advisory pipeline"
+  }
+]

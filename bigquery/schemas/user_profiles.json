@@ -1,0 +1,118 @@
+[
+  {
+    "name": "user_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "UUID uniquely identifying the user"
+  },
+  {
+    "name": "name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Full name of the user"
+  },
+  {
+    "name": "age",
+    "type": "INTEGER",
+    "mode": "NULLABLE",
+    "description": "Age of the user in years"
+  },
+  {
+    "name": "zip_code",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "5-digit ZIP code of the user's home address"
+  },
+  {
+    "name": "utility",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Electric utility provider: PGE, SCE, SDGE, OTHER"
+  },
+  {
+    "name": "medical_baseline_enrolled",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether the user is enrolled in the utility medical baseline rate program"
+  },
+  {
+    "name": "condition",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Primary medical condition: oxygen, dialysis, wheelchair, ventilator, heat_vulnerable, insulin_dependent, other"
+  },
+  {
+    "name": "equipment",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "description": "Primary medical equipment requiring electricity",
+    "fields": [
+      {"name": "type", "type": "STRING", "mode": "NULLABLE", "description": "Equipment category"},
+      {"name": "power_watts", "type": "INTEGER", "mode": "NULLABLE", "description": "Typical power draw in watts"},
+      {"name": "backup_hours", "type": "FLOAT", "mode": "NULLABLE", "description": "Hours of battery backup available"},
+      {"name": "supplier_name", "type": "STRING", "mode": "NULLABLE", "description": "Equipment supplier company name"},
+      {"name": "supplier_phone", "type": "STRING", "mode": "NULLABLE", "description": "Equipment supplier phone number"}
+    ]
+  },
+  {
+    "name": "medications",
+    "type": "RECORD",
+    "mode": "REPEATED",
+    "description": "Medications the user takes",
+    "fields": [
+      {"name": "name", "type": "STRING", "mode": "NULLABLE", "description": "Medication name"},
+      {"name": "requires_refrigeration", "type": "BOOL", "mode": "NULLABLE", "description": "Whether the medication requires refrigeration"},
+      {"name": "heat_sensitive", "type": "BOOL", "mode": "NULLABLE", "description": "Whether the medication degrades in heat"},
+      {"name": "beta_blocker", "type": "BOOL", "mode": "NULLABLE", "description": "Whether the medication is a beta blocker (impairs heat response)"}
+    ]
+  },
+  {
+    "name": "can_self_evacuate",
+    "type": "BOOL",
+    "mode": "NULLABLE",
+    "description": "Whether the user can evacuate without assistance"
+  },
+  {
+    "name": "preferred_language",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "ISO 639-1 language code for communications (default: en)"
+  },
+  {
+    "name": "caregiver",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "description": "Primary caregiver or emergency contact",
+    "fields": [
+      {"name": "name", "type": "STRING", "mode": "NULLABLE", "description": "Caregiver full name"},
+      {"name": "relationship", "type": "STRING", "mode": "NULLABLE", "description": "Relationship to user"},
+      {"name": "phone", "type": "STRING", "mode": "NULLABLE", "description": "Caregiver phone number"},
+      {"name": "email", "type": "STRING", "mode": "NULLABLE", "description": "Caregiver email address"},
+      {"name": "notify_threshold", "type": "STRING", "mode": "NULLABLE", "description": "Risk level at which to notify caregiver: ELEVATED, HIGH, CRITICAL"}
+    ]
+  },
+  {
+    "name": "nearest_resources",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "description": "Nearest emergency and medical resources",
+    "fields": [
+      {"name": "hospital_name", "type": "STRING", "mode": "NULLABLE", "description": "Nearest hospital name"},
+      {"name": "hospital_miles", "type": "FLOAT", "mode": "NULLABLE", "description": "Distance to nearest hospital in miles"},
+      {"name": "cooling_center", "type": "STRING", "mode": "NULLABLE", "description": "Nearest cooling center name or address"},
+      {"name": "pharmacy_name", "type": "STRING", "mode": "NULLABLE", "description": "Nearest pharmacy name"}
+    ]
+  },
+  {
+    "name": "created_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "When this user profile was first created"
+  },
+  {
+    "name": "updated_at",
+    "type": "TIMESTAMP",
+    "mode": "NULLABLE",
+    "description": "When this user profile was last updated"
+  }
+]
