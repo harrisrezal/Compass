@@ -38,15 +38,30 @@ const HAZARD_LABELS: Record<string, string> = {
   earthquake: "🫨 Seismic",
 };
 
+const RADIUS_KM: Record<string, number> = {
+  psps:       15,
+  wildfire:   8,
+  flood:      5,
+  heat:       25,
+  earthquake: 20,
+};
+
 export default function HazardMap({ mapData, hazardLevels }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
+  const mapsReadyRef = useRef(false);
   const [visibleLayers, setVisibleLayers] = useState<Record<string, boolean>>(
     () => Object.fromEntries(mapData.active_overlays.map((k) => [k, true]))
   );
   const [loadError, setLoadError] = useState(false);
   const circlesRef = useRef<Record<string, google.maps.Circle>>({});
 
+  // Reset visible layers whenever active_overlays changes (new simulation)
+  useEffect(() => {
+    setVisibleLayers(Object.fromEntries(mapData.active_overlays.map((k) => [k, true])));
+  }, [mapData.active_overlays]);
+
+  // One-time map initialisation
   useEffect(() => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     if (!apiKey) {
@@ -54,13 +69,11 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
       return;
     }
 
-    // Guard against double-init: setOptions must only be called before the
-    // Maps script loads. Navigating between pages that both render HazardMap
-    // (e.g. /hazards → /dashboard) would call it twice and trigger the
-    // "didn't load Google Maps correctly" error.
     if (typeof window !== "undefined" && !window.google?.maps) {
       setOptions({ key: apiKey, v: "weekly" });
     }
+
+    const [lat, lng] = mapData.user_lat_lng;
 
     Promise.all([
       importLibrary("maps"),
@@ -70,9 +83,6 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
     ]).then(() => {
       if (!mapRef.current) return;
 
-      const [lat, lng] = mapData.user_lat_lng;
-
-      // mapId is required for AdvancedMarkerElement
       const map = new google.maps.Map(mapRef.current, {
         center: { lat, lng },
         zoom: 11,
@@ -84,6 +94,7 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
         streetViewControl: false,
       });
       googleMapRef.current = map;
+      mapsReadyRef.current = true;
 
       // User location pin
       const pinEl = document.createElement("div");
@@ -96,55 +107,24 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
         content: pinEl,
       });
 
-      // Draw hazard radius circles as overlay proxies
-      // (In production these would be real GeoJSON polygons from the APIs)
-      mapData.active_overlays.forEach((hazardKey) => {
-        const level = hazardLevels[hazardKey] ?? "LOW";
-        if (level === "LOW") return;
+      // Draw initial circles
+      drawCircles(map, mapData.active_overlays, hazardLevels, mapData.user_lat_lng, circlesRef.current);
 
-        const radiusKm: Record<string, number> = {
-          psps:       15,
-          wildfire:   8,
-          flood:      5,
-          heat:       25,
-          earthquake: 20,
-        };
-
-        const circle = new google.maps.Circle({
-          strokeColor: OVERLAY_COLORS[level],
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: OVERLAY_COLORS[level],
-          fillOpacity: OVERLAY_OPACITY[level],
-          map,
-          center: { lat, lng },
-          radius: (radiusKm[hazardKey] ?? 10) * 1000,
-          visible: visibleLayers[hazardKey] ?? true,
-        });
-
-        circlesRef.current[hazardKey] = circle;
-      });
-
-      // Nearby resources (HIGH/CRITICAL hazards only)
+      // Nearby resources (HIGH/CRITICAL only)
       const highOrCritical = mapData.active_overlays.filter(
         (k) => hazardLevels[k] === "HIGH" || hazardLevels[k] === "CRITICAL"
       );
-
       if (highOrCritical.length > 0) {
         const resourceTypes = [
-          { includedType: "hospital",     icon: "🏥" },
-          { includedType: "gas_station",  icon: "⛽" },
+          { includedType: "hospital",    icon: "🏥" },
+          { includedType: "gas_station", icon: "⛽" },
         ];
-
         resourceTypes.forEach(async ({ includedType, icon }) => {
           try {
             const { places } = await google.maps.places.Place.searchNearby({
               fields: ["displayName", "location"],
               includedTypes: [includedType],
-              locationRestriction: {
-                center: { lat, lng },
-                radius: 10000,
-              },
+              locationRestriction: { center: { lat, lng }, radius: 10000 },
               maxResultCount: 3,
             });
             places.forEach((place) => {
@@ -161,12 +141,12 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
               });
             });
           } catch {
-            // Places search is best-effort — silently skip if unavailable
+            // Places search is best-effort
           }
         });
       }
 
-      // Evacuation route (WILDFIRE or FLOOD CRITICAL)
+      // Evacuation route
       if (mapData.evacuation_route) {
         const directionsService = new google.maps.DirectionsService();
         const directionsRenderer = new google.maps.DirectionsRenderer({
@@ -174,25 +154,31 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
           suppressMarkers: true,
           polylineOptions: { strokeColor: "#DC2626", strokeWeight: 5 },
         });
-
-        // Route away from hazard — head north-west by default
         const safePoint = { lat: lat + 0.3, lng: lng - 0.2 };
         directionsService.route(
-          {
-            origin: { lat, lng },
-            destination: safePoint,
-            travelMode: google.maps.TravelMode.DRIVING,
-          },
+          { origin: { lat, lng }, destination: safePoint, travelMode: google.maps.TravelMode.DRIVING },
           (result, status) => {
-            if (status === "OK" && result) {
-              directionsRenderer.setDirections(result);
-            }
+            if (status === "OK" && result) directionsRenderer.setDirections(result);
           }
         );
       }
     }).catch(() => setLoadError(true));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Re-center and redraw circles when mapData or hazardLevels change after initial load
+  useEffect(() => {
+    if (!mapsReadyRef.current || !googleMapRef.current) return;
+    const [lat, lng] = mapData.user_lat_lng;
+    googleMapRef.current.setCenter({ lat, lng });
+
+    // Remove stale circles
+    Object.values(circlesRef.current).forEach((c) => c.setMap(null));
+    circlesRef.current = {};
+
+    drawCircles(googleMapRef.current, mapData.active_overlays, hazardLevels, mapData.user_lat_lng, circlesRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapData.user_lat_lng, mapData.active_overlays, hazardLevels]);
 
   // Toggle circle visibility when checkbox changes
   useEffect(() => {
@@ -242,4 +228,29 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
       <div ref={mapRef} style={{ height: 420, width: "100%" }} />
     </div>
   );
+}
+
+function drawCircles(
+  map: google.maps.Map,
+  activeOverlays: string[],
+  hazardLevels: Record<string, HazardLevel>,
+  userLatLng: [number, number],
+  circlesOut: Record<string, google.maps.Circle>,
+) {
+  const [lat, lng] = userLatLng;
+  activeOverlays.forEach((hazardKey) => {
+    const level = hazardLevels[hazardKey] ?? "LOW";
+    if (level === "LOW") return;
+    const circle = new google.maps.Circle({
+      strokeColor: OVERLAY_COLORS[level],
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: OVERLAY_COLORS[level],
+      fillOpacity: OVERLAY_OPACITY[level],
+      map,
+      center: { lat, lng },
+      radius: (RADIUS_KM[hazardKey] ?? 10) * 1000,
+    });
+    circlesOut[hazardKey] = circle;
+  });
 }

@@ -157,6 +157,12 @@ export async function POST(req: NextRequest) {
 
     const { actual, prediction } = randomiseHazards(hazardData.hazards);
 
+    // Derive active_overlays from whichever hazards are non-LOW so the map always matches
+    const activeOverlays = Object.entries(hazardData.hazards)
+      .filter(([, h]) => h.level !== "LOW")
+      .map(([k]) => k);
+    const mapData = { ...hazardData.map_data, active_overlays: activeOverlays };
+
     const [plan, insights] = await Promise.all([
       generateActionPlan(hazardData.hazards, profile, lastUpdated),
       generateHazardInsights(hazardData.hazards, profile),
@@ -164,7 +170,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       hazards: hazardData.hazards,
-      map_data: hazardData.map_data,
+      map_data: mapData,
       lastUpdated,
       plan,
       insights,

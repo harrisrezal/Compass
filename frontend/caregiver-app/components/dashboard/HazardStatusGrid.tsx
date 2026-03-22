@@ -23,6 +23,13 @@ const HAZARD_META: Array<{ key: string; icon: string; name: string }> = [
   { key: "earthquake", icon: "🫨", name: "Earthquake" },
 ];
 
+const PREDICTION_LABELS: Record<HazardLevel, string> = {
+  LOW:      "Not in region",
+  MODERATE: "May affect area",
+  HIGH:     "Confirmed for area",
+  CRITICAL: "Hitting NOW",
+};
+
 const LEVEL_STYLES: Record<HazardLevel, { badge: string; border: string; bg: string }> = {
   LOW:      { badge: "bg-green-100 text-green-700",   border: "border-green-200",  bg: "bg-green-50/30" },
   MODERATE: { badge: "bg-yellow-100 text-yellow-700", border: "border-yellow-200", bg: "bg-yellow-50/30" },
@@ -51,6 +58,7 @@ export default function HazardStatusGrid({ hazards, lastUpdated, hazardInsights,
         const styles = LEVEL_STYLES[level];
         const predLevel: HazardLevel = (predictionLevels?.[key] as HazardLevel) ?? level;
         const actLevel:  HazardLevel = (actualLevels?.[key]    as HazardLevel) ?? level;
+        const isActive = actLevel === "HIGH" || actLevel === "CRITICAL";
         return (
           <div
             key={key}
@@ -67,15 +75,20 @@ export default function HazardStatusGrid({ hazards, lastUpdated, hazardInsights,
               {h?.label ?? "No data"}
             </p>
 
-            {/* Prediction / Actual rows */}
+            {/* Prediction / Active rows */}
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-400 w-16 shrink-0">Prediction</span>
-                <span className={`px-2 py-0.5 rounded-full font-semibold ${LEVEL_STYLES[predLevel].badge}`}>{predLevel}</span>
+                <span className="text-slate-400 w-16 shrink-0">Forecast</span>
+                <span className={`px-2 py-0.5 rounded-full font-semibold text-[11px] ${LEVEL_STYLES[predLevel].badge}`}>
+                  {PREDICTION_LABELS[predLevel]}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-400 w-16 shrink-0">Actual</span>
-                <span className={`px-2 py-0.5 rounded-full font-semibold ${LEVEL_STYLES[actLevel].badge}`}>{actLevel}</span>
+                <span className="text-slate-400 w-16 shrink-0">Active</span>
+                {isActive
+                  ? <span className="font-semibold text-red-600">Active</span>
+                  : <span className="text-slate-400">Not Active</span>
+                }
               </div>
             </div>
 
