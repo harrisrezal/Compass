@@ -227,6 +227,24 @@ export default async function DashboardPage({ params }: Props) {
     Object.entries(hazardData.hazards).map(([k, v]) => [k, v.level])
   ) as Record<string, HazardLevel>;
 
+  // Derive overall risk level from the worst individual hazard
+  const LEVEL_ORDER = ["LOW", "MODERATE", "HIGH", "CRITICAL"] as const;
+  const overallLevel = Object.values(hazardLevels).reduce<string>(
+    (worst, lvl) => LEVEL_ORDER.indexOf(lvl as typeof LEVEL_ORDER[number]) > LEVEL_ORDER.indexOf(worst as typeof LEVEL_ORDER[number]) ? lvl : worst,
+    "LOW"
+  );
+  const criticalCount = Object.values(hazardLevels).filter(l => l === "CRITICAL").length;
+  const highCount     = Object.values(hazardLevels).filter(l => l === "HIGH").length;
+  const activeThreats = criticalCount + highCount;
+
+  const RISK_BADGE: Record<string, { dot: string; badge: string; label: string; desc: string }> = {
+    LOW:      { dot: "bg-green-500",  badge: "bg-green-100 text-green-700 border border-green-200",   label: "All Clear",  desc: "All hazards at low risk" },
+    MODERATE: { dot: "bg-yellow-500", badge: "bg-yellow-100 text-yellow-700 border border-yellow-200", label: "Monitor",    desc: "Some hazards need monitoring" },
+    HIGH:     { dot: "bg-red-500",    badge: "bg-red-100 text-red-700 border border-red-300",          label: "High Risk",  desc: `${activeThreats} hazard${activeThreats !== 1 ? "s" : ""} require attention` },
+    CRITICAL: { dot: "bg-red-500",    badge: "bg-red-100 text-red-700 border border-red-300",          label: "High Risk",  desc: `${activeThreats} active threat${activeThreats !== 1 ? "s" : ""} — act now` },
+  };
+  const risk = RISK_BADGE[overallLevel] ?? RISK_BADGE["LOW"];
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Nav */}
@@ -249,11 +267,20 @@ export default async function DashboardPage({ params }: Props) {
 
       <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Patient header */}
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">{profile.name}</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            {profile.condition} · ZIP {profile.zip_code} · {profile.utility}
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">{profile.name}</h1>
+            <p className="text-slate-500 text-sm mt-1">
+              {profile.condition} · ZIP {profile.zip_code} · {profile.utility}
+            </p>
+          </div>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${risk.badge}`}>
+              <span className={`w-2 h-2 rounded-full ${risk.dot} animate-pulse`} />
+              {risk.label}
+            </span>
+            <span className="text-xs text-slate-500">{risk.desc}</span>
+          </div>
         </div>
 
         {/* Hazard status cards — full width */}
