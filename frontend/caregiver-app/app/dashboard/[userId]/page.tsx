@@ -5,6 +5,7 @@ import RiskScoreCard from "@/components/dashboard/RiskScoreCard";
 import ActionPlanChecklist from "@/components/dashboard/ActionPlanChecklist";
 import OrganisationsPanel from "@/components/dashboard/OrganisationsPanel";
 import SubscribersPanel from "@/components/dashboard/SubscribersPanel";
+import CallButton from "@/components/dashboard/CallButton";
 
 interface Props {
   params: Promise<{ userId: string }>;
@@ -100,8 +101,12 @@ export default async function DashboardPage({ params }: Props) {
       {/* Nav */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
         <Link href="/" className="text-blue-700 font-bold text-lg">🧭 Compass</Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <span className="text-sm text-slate-500">{profile.name}</span>
+          <CallButton
+            patient={profile as unknown as Record<string, unknown>}
+            score={score as unknown as Record<string, unknown>}
+          />
           <Link
             href={`/chat?userId=${userId}`}
             className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
