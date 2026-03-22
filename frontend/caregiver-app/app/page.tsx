@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-linear-to-br from-blue-950 to-slate-900 text-white px-6">
       <div className="max-w-lg text-center space-y-6">
-        <div className="text-5xl font-bold tracking-tight">🧭 Compass</div>
+        <div className="text-5xl font-bold tracking-tight">🛡️ Guardian Angel.AI</div>
         <p className="text-xl text-blue-200">
           AI Medical Emergency Intelligence for California
         </p>

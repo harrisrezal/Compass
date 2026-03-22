@@ -44,7 +44,7 @@ async function generateActionPlan(
 
   const backupStr = profile.backupHours > 0 ? `${profile.backupHours}h backup power` : "no backup power";
 
-  const prompt = `You are Compass, an AI emergency preparedness assistant for medically vulnerable Californians.
+  const prompt = `You are Guardian Angel.AI, an AI emergency preparedness assistant for medically vulnerable Californians.
 
 Patient profile:
 - Name: ${profile.name}
@@ -98,7 +98,7 @@ async function generateHazardInsights(
     .join("\n");
 
   const backupStr = profile.backupHours > 0 ? `${profile.backupHours}h backup` : "no backup";
-  const prompt = `You are Compass, an AI emergency assistant for medically vulnerable Californians.
+  const prompt = `You are Guardian Angel.AI, an AI emergency assistant for medically vulnerable Californians.
 
 Patient: ${profile.name}, condition: ${profile.condition}, backup power: ${backupStr}
 
@@ -121,7 +121,26 @@ Return ONLY valid JSON with hazard keys in lowercase: ${JSON.stringify(Object.fr
   }
 }
 
+type HazardEntry = { level: string; label: string; action?: string; reasoning?: string; data_sources?: string[] };
+
 const LEVELS = ["LOW", "MODERATE", "HIGH", "CRITICAL"] as const;
+
+/** Keep only the top-2 non-LOW hazards; force the rest to LOW. */
+function capToTwoActiveHazards(hazards: Record<string, HazardEntry>): Record<string, HazardEntry> {
+  const entries = Object.entries(hazards);
+  const nonLow = entries
+    .filter(([, h]) => h.level !== "LOW")
+    .sort(([, a], [, b]) =>
+      LEVELS.indexOf(b.level as typeof LEVELS[number]) -
+      LEVELS.indexOf(a.level as typeof LEVELS[number])
+    );
+  const keep = new Set(nonLow.slice(0, 2).map(([k]) => k));
+  const result: Record<string, HazardEntry> = {};
+  for (const [key, h] of entries) {
+    result[key] = keep.has(key) ? h : { ...h, level: "LOW" };
+  }
+  return result;
+}
 
 function randomiseHazards(hazards: Record<string, { level: string }>) {
   const actual: Record<string, string> = {};
@@ -155,21 +174,24 @@ export async function POST(req: NextRequest) {
     const lastUpdated = hazardData.last_updated ?? new Date().toISOString();
     const profile = { name: name ?? "Patient", condition: condition ?? "other", backupHours: backupHours ?? 0, zip_code: zip ?? "00000", age };
 
-    const { actual, prediction } = randomiseHazards(hazardData.hazards);
+    // Cap to max 2 active hazards; remaining are forced to LOW
+    const cappedHazards = capToTwoActiveHazards(hazardData.hazards as Record<string, HazardEntry>);
 
-    // Derive active_overlays from whichever hazards are non-LOW so the map always matches
-    const activeOverlays = Object.entries(hazardData.hazards as Record<string, { level: string }>)
+    const { actual, prediction } = randomiseHazards(cappedHazards);
+
+    // Derive active_overlays from non-LOW hazards so the map always matches
+    const activeOverlays = Object.entries(cappedHazards)
       .filter(([, h]) => h.level !== "LOW")
       .map(([k]) => k);
     const mapData = { ...hazardData.map_data, active_overlays: activeOverlays };
 
     const [plan, insights] = await Promise.all([
-      generateActionPlan(hazardData.hazards, profile, lastUpdated),
-      generateHazardInsights(hazardData.hazards, profile),
+      generateActionPlan(cappedHazards, profile, lastUpdated),
+      generateHazardInsights(cappedHazards, profile),
     ]);
 
     return NextResponse.json({
-      hazards: hazardData.hazards,
+      hazards: cappedHazards,
       map_data: mapData,
       lastUpdated,
       plan,

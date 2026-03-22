@@ -169,7 +169,7 @@ export default function OrganisationPage() {
     <div className="min-h-screen bg-slate-50">
       {/* Nav */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-blue-700 font-bold text-lg">🧭 Compass</Link>
+        <Link href="/" className="text-blue-700 font-bold text-lg">🛡️ Guardian Angel.AI</Link>
         <div className="flex items-center gap-3 text-sm text-slate-500">
           <span className="font-medium text-slate-700">{ORG.name}</span>
           <span>·</span>

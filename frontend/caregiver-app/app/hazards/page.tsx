@@ -113,7 +113,7 @@ export default function HazardsPage() {
       {/* Header */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center gap-3">
         <a href="/" className="text-blue-700 font-bold text-lg flex items-center gap-2">
-          🧭 Compass
+          🛡️ Guardian Angel.AI
         </a>
         <span className="text-slate-300">/</span>
         <span className="text-slate-700 font-medium">Hazard Alert Check</span>
