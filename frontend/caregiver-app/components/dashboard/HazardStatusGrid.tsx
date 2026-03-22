@@ -11,6 +11,8 @@ interface Props {
   hazards: Record<string, HazardSummary>;
   lastUpdated?: string;
   hazardInsights?: Record<string, string>;
+  predictionLevels?: Record<string, string>;
+  actualLevels?: Record<string, string>;
 }
 
 const HAZARD_META: Array<{ key: string; icon: string; name: string }> = [
@@ -38,7 +40,7 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function HazardStatusGrid({ hazards, lastUpdated, hazardInsights }: Props) {
+export default function HazardStatusGrid({ hazards, lastUpdated, hazardInsights, predictionLevels, actualLevels }: Props) {
   const updatedLabel = lastUpdated ? timeAgo(lastUpdated) : null;
 
   return (
@@ -47,6 +49,8 @@ export default function HazardStatusGrid({ hazards, lastUpdated, hazardInsights 
         const h = hazards[key];
         const level: HazardLevel = (h?.level as HazardLevel) ?? "LOW";
         const styles = LEVEL_STYLES[level];
+        const predLevel: HazardLevel = (predictionLevels?.[key] as HazardLevel) ?? level;
+        const actLevel:  HazardLevel = (actualLevels?.[key]    as HazardLevel) ?? level;
         return (
           <div
             key={key}
@@ -67,11 +71,11 @@ export default function HazardStatusGrid({ hazards, lastUpdated, hazardInsights 
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-slate-400 w-16 shrink-0">Prediction</span>
-                <span className={`px-2 py-0.5 rounded-full font-semibold ${styles.badge}`}>{level}</span>
+                <span className={`px-2 py-0.5 rounded-full font-semibold ${LEVEL_STYLES[predLevel].badge}`}>{predLevel}</span>
               </div>
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-slate-400 w-16 shrink-0">Actual</span>
-                <span className={`px-2 py-0.5 rounded-full font-semibold ${styles.badge}`}>{level}</span>
+                <span className={`px-2 py-0.5 rounded-full font-semibold ${LEVEL_STYLES[actLevel].badge}`}>{actLevel}</span>
               </div>
             </div>
 

@@ -28,13 +28,6 @@ function getOrgs(profile: UserProfile): Org[] {
       detail: "Open during heat advisories",
     });
   }
-  if (nr?.pharmacy_name) {
-    orgs.push({
-      name: nr.pharmacy_name,
-      type: "Pharmacy",
-      icon: "💊",
-    });
-  }
   if (profile.equipment?.supplier_name) {
     orgs.push({
       name: profile.equipment.supplier_name,
@@ -48,7 +41,6 @@ function getOrgs(profile: UserProfile): Org[] {
   const communityOrgs: Record<string, Org[]> = {
     "93720": [
       { name: "Fresno Disability Resource Center", type: "Non-profit", icon: "🤝", detail: "Evacuation assistance" },
-      { name: "United Way Fresno County", type: "Community", icon: "🌐", detail: "Emergency support services" },
     ],
     "95969": [
       { name: "Butte County Emergency Services", type: "Government", icon: "🚨", detail: "PSPS support line" },
