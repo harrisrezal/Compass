@@ -20,7 +20,7 @@ export default function HazardInputForm({ onSubmit, loading }: Props) {
   const [medical, setMedical] = useState(false);
   const [pets, setPets] = useState(false);
   const [ageGroup, setAgeGroup] = useState<HazardFormValues["ageGroup"]>("18-64");
-  const [simulate, setSimulate] = useState(false);
+  const [simulate, setSimulate] = useState(true);
   const [error, setError] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -95,8 +95,8 @@ export default function HazardInputForm({ onSubmit, loading }: Props) {
       {/* Demo mode */}
       <div className="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
         <div>
-          <p className="text-sm font-medium text-slate-700">Demo Mode</p>
-          <p className="text-xs text-slate-500">Returns simulated HIGH/CRITICAL data for all hazards</p>
+          <p className="text-sm font-medium text-slate-700">Demo Data Mode {simulate && <span className="text-orange-500 text-xs font-normal">(active)</span>}</p>
+          <p className="text-xs text-slate-500">Uses realistic simulated hazard data. Disable when live API keys are configured.</p>
         </div>
         <div
           onClick={() => setSimulate((v) => !v)}
