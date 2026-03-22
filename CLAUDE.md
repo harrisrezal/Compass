@@ -104,6 +104,24 @@ gcloud auth application-default login
 - [ ] Frontend (React) — patient app, caregiver app, caseworker dashboard
 - [ ] RocketRide pipeline wiring
 
+## Git & PR Workflow
+
+**Never commit directly to `main`.** Always work on a feature branch and open a PR.
+
+```bash
+# Start every piece of work like this:
+git checkout main && git pull
+git checkout -b feat/your-feature-name
+
+# When done, push and open a PR:
+git push -u origin feat/your-feature-name
+gh pr create --title "..." --body "..."
+```
+
+- Branch names: `feat/`, `fix/`, `chore/` prefixes
+- Merging a PR to `main` automatically triggers GitHub Actions to deploy both Cloud Run services
+- After each PR is merged, start the next task on a **new branch from the updated main**
+
 ## Conventions
 
 - All BigQuery writes use `client.insert_rows_json()` (streaming insert)
