@@ -7,14 +7,14 @@ interface Props {
   onChange: (updates: Partial<UserProfileCreate>) => void;
 }
 
-const CONDITIONS: { value: Condition; label: string; icon: string; crisis: string }[] = [
-  { value: "oxygen",         label: "Home oxygen",        icon: "🫁", crisis: "4–8 hrs" },
-  { value: "ventilator",     label: "Ventilator / BiPAP", icon: "🩺", crisis: "Minutes" },
-  { value: "dialysis",       label: "Dialysis",           icon: "💉", crisis: "48–72 hrs" },
-  { value: "wheelchair",     label: "Power wheelchair",   icon: "♿", crisis: "8–16 hrs" },
-  { value: "heat_vulnerable",label: "Heat vulnerable",    icon: "🌡️", crisis: "4–8 hrs" },
-  { value: "insulin_dependent", label: "Insulin dependent", icon: "💊", crisis: "Hours" },
-  { value: "other",          label: "Other",              icon: "🏥", crisis: "Varies" },
+const CONDITIONS: { value: Condition; label: string; icon: string }[] = [
+  { value: "oxygen",            label: "Home oxygen",        icon: "🫁" },
+  { value: "ventilator",        label: "Ventilator / BiPAP", icon: "🩺" },
+  { value: "dialysis",          label: "Dialysis",           icon: "💉" },
+  { value: "wheelchair",        label: "Power wheelchair",   icon: "♿" },
+  { value: "heat_vulnerable",   label: "Heat vulnerable",    icon: "🌡️" },
+  { value: "insulin_dependent", label: "Insulin dependent",  icon: "💊" },
+  { value: "other",             label: "Other",              icon: "🏥" },
 ];
 
 export default function StepCondition({ data, onChange }: Props) {
@@ -23,7 +23,7 @@ export default function StepCondition({ data, onChange }: Props) {
       <div>
         <h2 className="text-2xl font-bold text-slate-900">Medical condition</h2>
         <p className="text-slate-500 mt-1">
-          Select the primary condition that requires electricity to manage.
+          Select the primary condition that best fits the client.
         </p>
       </div>
 
@@ -32,7 +32,7 @@ export default function StepCondition({ data, onChange }: Props) {
           <button
             key={c.value}
             type="button"
-            onClick={() => onChange({ condition: c.value })}
+            onClick={() => onChange({ condition: c.value, other_condition: undefined })}
             className={`border-2 rounded-xl p-4 text-left transition ${
               data.condition === c.value
                 ? "border-blue-500 bg-blue-50"
@@ -41,10 +41,24 @@ export default function StepCondition({ data, onChange }: Props) {
           >
             <span className="text-2xl">{c.icon}</span>
             <div className="font-medium text-slate-900 mt-1">{c.label}</div>
-            <div className="text-xs text-slate-500">Crisis window: {c.crisis}</div>
           </button>
         ))}
       </div>
+
+      {data.condition === "other" && (
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-slate-700">
+            Please describe the condition <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={data.other_condition ?? ""}
+            onChange={(e) => onChange({ other_condition: e.target.value })}
+            placeholder="e.g. ALS, muscular dystrophy, spinal cord injury…"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      )}
 
       <div className="flex items-center gap-3 pt-2">
         <input
