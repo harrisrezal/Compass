@@ -1,23 +1,19 @@
 import Link from "next/link";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { UserProfile, ActionPlan, ActionItem } from "@/lib/types";
-import ActionPlanChecklist from "@/components/dashboard/ActionPlanChecklist";
-import OrganisationsPanel from "@/components/dashboard/OrganisationsPanel";
-import SubscribersPanel from "@/components/dashboard/SubscribersPanel";
 import CallButton from "@/components/dashboard/CallButton";
-import HazardStatusGrid from "@/components/dashboard/HazardStatusGrid";
-import HazardMap from "@/components/hazards/HazardMap";
+import SimulationPanel from "@/components/dashboard/SimulationPanel";
 
 interface Props {
   params: Promise<{ userId: string }>;
 }
 
-type HazardLevel = "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
-
 interface HazardSummary {
-  level: HazardLevel;
+  level: string;
   label: string;
-  action: string;
+  action?: string;
+  reasoning?: string;
+  data_sources?: string[];
 }
 
 interface HazardMapData {
@@ -73,31 +69,31 @@ const DEMO_PROFILES: Record<string, UserProfile> = {
 const DEMO_HAZARDS: Record<string, HazardResponse> = {
   "demo-user-margaret-001": {
     hazards: {
-      psps:       { level: "CRITICAL", label: "PSPS Alert",        action: "Charge backup immediately" },
-      wildfire:   { level: "HIGH",     label: "Red Flag Warning",   action: "Prepare to evacuate" },
-      flood:      { level: "LOW",      label: "No flood risk",      action: "No action needed" },
-      heat:       { level: "HIGH",     label: "Heat Advisory",      action: "Stay indoors" },
-      earthquake: { level: "LOW",      label: "Normal seismic",     action: "No action needed" },
+      psps:       { level: "CRITICAL", label: "PSPS Alert",        action: "Charge backup immediately",  reasoning: "An active public safety power shutoff is confirmed in effect from PG&E." },
+      wildfire:   { level: "HIGH",     label: "Red Flag Warning",   action: "Prepare to evacuate",        reasoning: "NWS Red Flag Warning active with high winds and critically low humidity." },
+      flood:      { level: "LOW",      label: "No flood risk",      action: "No action needed",           reasoning: "No flood warnings or watches active for this location." },
+      heat:       { level: "HIGH",     label: "Heat Advisory",      action: "Stay indoors",               reasoning: "NWS heat advisory active — heat index reaching 108°F." },
+      earthquake: { level: "LOW",      label: "Normal seismic",     action: "No action needed",           reasoning: "No earthquakes M2.5+ detected within 50km in the past 24 hours." },
     },
     map_data: { user_lat_lng: [36.8034, -119.7195], active_overlays: ["psps", "wildfire", "heat"], evacuation_route: null },
   },
   "demo-user-james-002": {
     hazards: {
-      psps:       { level: "HIGH",     label: "PSPS Risk",          action: "Activate generator plan" },
-      wildfire:   { level: "CRITICAL", label: "Active Fire Nearby", action: "Evacuate now" },
-      flood:      { level: "LOW",      label: "No flood risk",      action: "No action needed" },
-      heat:       { level: "MODERATE", label: "Warm conditions",    action: "Monitor temperature" },
-      earthquake: { level: "LOW",      label: "Normal seismic",     action: "No action needed" },
+      psps:       { level: "HIGH",     label: "PSPS Risk",          action: "Activate generator plan",    reasoning: "PG&E has issued a shutoff warning for this zone within 6 hours." },
+      wildfire:   { level: "CRITICAL", label: "Active Fire Nearby", action: "Evacuate now",               reasoning: "A mandatory evacuation order is in effect — active fire 8km away." },
+      flood:      { level: "LOW",      label: "No flood risk",      action: "No action needed",           reasoning: "No flood warnings or watches active." },
+      heat:       { level: "MODERATE", label: "Warm conditions",    action: "Monitor temperature",        reasoning: "Heat advisory may be issued — heat index reaching 88°F." },
+      earthquake: { level: "LOW",      label: "Normal seismic",     action: "No action needed",           reasoning: "No significant seismic activity detected nearby." },
     },
     map_data: { user_lat_lng: [39.7596, -121.6219], active_overlays: ["psps", "wildfire", "heat"], evacuation_route: { trigger: "wildfire" } },
   },
   "demo-user-dorothy-003": {
     hazards: {
-      psps:       { level: "LOW",      label: "No PSPS risk",       action: "No action needed" },
-      wildfire:   { level: "LOW",      label: "No wildfire risk",   action: "No action needed" },
-      flood:      { level: "MODERATE", label: "Flood Watch",        action: "Monitor alerts" },
-      heat:       { level: "HIGH",     label: "Excessive Heat",     action: "Go to cooling center" },
-      earthquake: { level: "MODERATE", label: "Seismic Zone",       action: "Secure heavy furniture" },
+      psps:       { level: "LOW",      label: "No PSPS risk",       action: "No action needed",           reasoning: "No active shutoff zones, warnings, or watches from SCE." },
+      wildfire:   { level: "LOW",      label: "No wildfire risk",   action: "No action needed",           reasoning: "No active fires within 50km, no evacuation orders or warnings." },
+      flood:      { level: "MODERATE", label: "Flood Watch",        action: "Monitor alerts",             reasoning: "NWS has issued a flood watch — conditions favourable for flooding in coming hours." },
+      heat:       { level: "HIGH",     label: "Excessive Heat",     action: "Go to cooling center",       reasoning: "NWS Excessive Heat Warning — heat index 104°F, overnight low 82°F." },
+      earthquake: { level: "MODERATE", label: "Seismic Zone",       action: "Secure heavy furniture",     reasoning: "This address is in a CGSHM liquefaction risk zone with recent M3.1 activity 18km away." },
     },
     map_data: { user_lat_lng: [34.0211, -118.4001], active_overlays: ["flood", "heat", "earthquake"], evacuation_route: null },
   },
@@ -110,13 +106,13 @@ const DEMO_PLAN: ActionPlan = {
   risk_level: "CRITICAL",
   primary_threat: "grid",
   action_items: [
-    { order: 1, urgency: "NOW",          action: "Charge backup battery",         detail: "Plug in your oxygen concentrator battery pack immediately — you have 4 hours of backup.",    completed: false },
-    { order: 2, urgency: "NOW",          action: "Call AeroCare Medical",          detail: "Notify your supplier (1-800-232-7263) that a PSPS event is expected in your ZIP.",           completed: false },
-    { order: 3, urgency: "TODAY",        action: "Pick up medications",            detail: "Collect a 7-day supply from CVS Pharmacy before the outage window.",                          completed: false },
-    { order: 4, urgency: "BEFORE_EVENT", action: "Pre-position at hospital",       detail: "Fresno Community Hospital (1.8 miles) has backup power — consider relocating before 4PM.",  completed: false },
-    { order: 5, urgency: "BEFORE_EVENT", action: "Alert caregiver",                detail: "Maria Rodriguez has been notified. Confirm she can reach you within 30 minutes.",             completed: true  },
-    { order: 6, urgency: "DURING",       action: "Conserve oxygen supply",         detail: "Reduce activity level to extend backup battery life. Stay seated and calm.",                 completed: false },
-    { order: 7, urgency: "DURING",       action: "Call 211 if battery below 1h",   detail: "211 California can coordinate emergency power for medical equipment.",                        completed: false },
+    { order: 1, urgency: "NOW",          action: "Charge backup battery",       detail: "Plug in your oxygen concentrator battery pack immediately — you have 4 hours of backup.", completed: false },
+    { order: 2, urgency: "NOW",          action: "Call AeroCare Medical",        detail: "Notify your supplier (1-800-232-7263) that a PSPS event is expected in your ZIP.",        completed: false },
+    { order: 3, urgency: "TODAY",        action: "Pick up medications",          detail: "Collect a 7-day supply from CVS Pharmacy before the outage window.",                        completed: false },
+    { order: 4, urgency: "BEFORE_EVENT", action: "Pre-position at hospital",     detail: "Fresno Community Hospital (1.8 miles) has backup power — consider relocating before 4PM.", completed: false },
+    { order: 5, urgency: "BEFORE_EVENT", action: "Alert caregiver",              detail: "Maria Rodriguez has been notified. Confirm she can reach you within 30 minutes.",           completed: true  },
+    { order: 6, urgency: "DURING",       action: "Conserve oxygen supply",       detail: "Reduce activity level to extend backup battery life. Stay seated and calm.",               completed: false },
+    { order: 7, urgency: "DURING",       action: "Call 211 if battery below 1h", detail: "211 California can coordinate emergency power for medical equipment.",                      completed: false },
   ],
 };
 
@@ -242,49 +238,19 @@ export default async function DashboardPage({ params }: Props) {
   const hazardData: HazardResponse =
     hazardResult ?? (DEMO_HAZARDS[userId] ?? DEMO_HAZARDS["demo-user-margaret-001"]);
 
-  // Generate Gemini outputs in parallel
   const lastUpdated = hazardData.last_updated ?? new Date().toISOString();
   const [geminiPlan, hazardInsights] = await Promise.all([
     generateActionPlan(hazardData.hazards, profile, lastUpdated),
     generateHazardInsights(hazardData.hazards, profile),
   ]);
 
-  // Build ActionPlan from Gemini output (or fall back to static demo plan)
-  const plan: ActionPlan = geminiPlan
-    ? {
-        plan_id: "gemini",
-        user_id: userId,
-        generated_at: lastUpdated,
-        action_items: geminiPlan.items.map((item, i): ActionItem => ({
-          order: i + 1,
-          action: item.action,
-          detail: item.detail,
-          completed: false,
-        })),
-      }
-    : { ...DEMO_PLAN, user_id: userId };
-
-  const hazardLevels = Object.fromEntries(
-    Object.entries(hazardData.hazards).map(([k, v]) => [k, v.level])
-  ) as Record<string, HazardLevel>;
-
-  // Derive overall risk level from the worst individual hazard
-  const LEVEL_ORDER = ["LOW", "MODERATE", "HIGH", "CRITICAL"] as const;
-  const overallLevel = Object.values(hazardLevels).reduce<string>(
-    (worst, lvl) => LEVEL_ORDER.indexOf(lvl as typeof LEVEL_ORDER[number]) > LEVEL_ORDER.indexOf(worst as typeof LEVEL_ORDER[number]) ? lvl : worst,
-    "LOW"
-  );
-  const criticalCount = Object.values(hazardLevels).filter(l => l === "CRITICAL").length;
-  const highCount     = Object.values(hazardLevels).filter(l => l === "HIGH").length;
-  const activeThreats = criticalCount + highCount;
-
-  const RISK_BADGE: Record<string, { dot: string; badge: string; label: string; desc: string }> = {
-    LOW:      { dot: "bg-green-500",  badge: "bg-green-100 text-green-700 border border-green-200",   label: "All Clear",  desc: "All hazards at low risk" },
-    MODERATE: { dot: "bg-yellow-500", badge: "bg-yellow-100 text-yellow-700 border border-yellow-200", label: "Monitor",    desc: "Some hazards need monitoring" },
-    HIGH:     { dot: "bg-red-500",    badge: "bg-red-100 text-red-700 border border-red-300",          label: "High Risk",  desc: `${activeThreats} hazard${activeThreats !== 1 ? "s" : ""} require attention` },
-    CRITICAL: { dot: "bg-red-500",    badge: "bg-red-100 text-red-700 border border-red-300",          label: "High Risk",  desc: `${activeThreats} active threat${activeThreats !== 1 ? "s" : ""} — act now` },
+  const initialData = {
+    hazards: hazardData.hazards,
+    map_data: hazardData.map_data,
+    lastUpdated,
+    plan: geminiPlan,
+    insights: hazardInsights,
   };
-  const risk = RISK_BADGE[overallLevel] ?? RISK_BADGE["LOW"];
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -306,48 +272,14 @@ export default async function DashboardPage({ params }: Props) {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        {/* Patient header */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">{profile.name}</h1>
-            <p className="text-slate-500 text-sm mt-1">
-              {profile.condition} · ZIP {profile.zip_code} · {profile.utility}
-            </p>
-          </div>
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold ${risk.badge}`}>
-              <span className={`w-2 h-2 rounded-full ${risk.dot} animate-pulse`} />
-              {risk.label}
-            </span>
-            <span className="text-xs text-slate-500">{risk.desc}</span>
-          </div>
-        </div>
-
-        {/* Hazard status cards — full width */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-slate-700">Hazard Status</h2>
-            <span className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1 rounded-full font-medium">
-              🛡️ Monitoring next 72 hours
-            </span>
-          </div>
-          <HazardStatusGrid hazards={hazardData.hazards} lastUpdated={lastUpdated} hazardInsights={hazardInsights} />
-        </div>
-
-        {/* Map + sidebar */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <HazardMap mapData={hazardData.map_data} hazardLevels={hazardLevels} />
-          </div>
-          <div className="space-y-4">
-            <OrganisationsPanel profile={profile} />
-            <SubscribersPanel profile={profile} />
-          </div>
-        </div>
-
-        {/* Action plan */}
-        <ActionPlanChecklist plan={plan} summary={geminiPlan?.summary} />
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <SimulationPanel
+          initialData={initialData}
+          profile={profile}
+          initialCondition={profile.condition ?? "oxygen"}
+          initialBackupHours={profile.equipment?.backup_hours ?? 0}
+          userId={userId}
+        />
       </main>
     </div>
   );
