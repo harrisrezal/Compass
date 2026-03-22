@@ -1,18 +1,12 @@
 "use client";
 
-import type { NotifyThreshold, UserProfileCreate } from "@/lib/types";
+import type { UserProfileCreate } from "@/lib/types";
 
 interface Props {
   data: Partial<UserProfileCreate>;
   onChange: (updates: Partial<UserProfileCreate>) => void;
   mode: "caregiver" | "self";
 }
-
-const THRESHOLDS: { value: NotifyThreshold; label: string; desc: string }[] = [
-  { value: "ELEVATED", label: "Elevated (60+)",  desc: "Notify early — best for hands-on caregivers" },
-  { value: "HIGH",     label: "High (80+)",      desc: "Notify when situation is serious" },
-  { value: "CRITICAL", label: "Critical (95+)",  desc: "Notify only in emergencies" },
-];
 
 export default function StepCaregiverDetails({ data, onChange, mode }: Props) {
   const cg = data.caregiver ?? {};
@@ -27,7 +21,7 @@ export default function StepCaregiverDetails({ data, onChange, mode }: Props) {
         </h2>
         <p className="text-slate-500 mt-1">
           {mode === "caregiver"
-            ? "You'll receive alerts when the patient's risk crosses the threshold you set."
+            ? "You'll receive alerts when the patient's risk score rises."
             : "Who should be notified if your risk score rises?"}
         </p>
       </div>
@@ -75,35 +69,6 @@ export default function StepCaregiverDetails({ data, onChange, mode }: Props) {
             placeholder="maria@email.com"
             className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-2">Alert threshold</label>
-        <div className="space-y-2">
-          {THRESHOLDS.map((t) => (
-            <label
-              key={t.value}
-              className={`flex items-start gap-3 border-2 rounded-xl px-4 py-3 cursor-pointer transition ${
-                cg.notify_threshold === t.value
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-slate-200 hover:border-slate-300"
-              }`}
-            >
-              <input
-                type="radio"
-                name="threshold"
-                value={t.value}
-                checked={cg.notify_threshold === t.value}
-                onChange={() => update("notify_threshold", t.value)}
-                className="mt-0.5"
-              />
-              <div>
-                <div className="font-medium text-slate-900 text-sm">{t.label}</div>
-                <div className="text-xs text-slate-500">{t.desc}</div>
-              </div>
-            </label>
-          ))}
         </div>
       </div>
     </div>
