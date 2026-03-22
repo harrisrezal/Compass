@@ -30,6 +30,7 @@ interface HazardMapData {
 interface HazardResponse {
   hazards: Record<string, HazardSummary>;
   map_data: HazardMapData;
+  last_updated: string;
 }
 
 // Demo user profiles for fallback when BQ has no profile record
