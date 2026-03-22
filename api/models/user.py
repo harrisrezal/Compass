@@ -45,12 +45,20 @@ class Medication(BaseModel):
     beta_blocker: Optional[bool] = None
 
 
+class ContactChannel(str, Enum):
+    TELEGRAM = "telegram"
+    WHATSAPP = "whatsapp"
+    WECHAT = "wechat"
+    SMS = "sms"
+
+
 class Caregiver(BaseModel):
     name: Optional[str] = None
     relationship: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
     notify_threshold: Optional[NotifyThreshold] = None
+    contact_channel: Optional[ContactChannel] = None
 
 
 class NearestResources(BaseModel):
@@ -79,7 +87,8 @@ class UserProfile(BaseModel):
 
 
 class UserProfileCreate(BaseModel):
-    """Request body for POST /users — user_id auto-generated server-side."""
+    """Request body for POST /users — user_id optional; generated server-side if not provided."""
+    user_id: Optional[str] = None
     name: str
     age: Optional[int] = None
     zip_code: str

@@ -10,6 +10,7 @@ export type Condition =
   | "insulin_dependent"
   | "other";
 export type NotifyThreshold = "ELEVATED" | "HIGH" | "CRITICAL";
+export type ContactChannel = "telegram" | "whatsapp" | "wechat" | "sms";
 export type RiskLevel = "LOW" | "MODERATE" | "ELEVATED" | "HIGH" | "CRITICAL";
 export type PrimaryThreat = "grid" | "heat" | "wildfire" | "flood" | "none";
 export type Urgency = "NOW" | "TODAY" | "BEFORE_EVENT" | "DURING" | "AFTER";
@@ -35,6 +36,7 @@ export interface Caregiver {
   phone?: string;
   email?: string;
   notify_threshold?: NotifyThreshold;
+  contact_channel?: ContactChannel;
 }
 
 export interface NearestResources {
@@ -63,7 +65,7 @@ export interface UserProfile {
   updated_at?: string;
 }
 
-export type UserProfileCreate = Omit<UserProfile, "user_id" | "created_at" | "updated_at">;
+export type UserProfileCreate = Omit<UserProfile, "created_at" | "updated_at"> & { user_id?: string };
 
 export interface RiskScore {
   score_id: string;

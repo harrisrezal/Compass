@@ -23,9 +23,9 @@ def _client() -> bigquery.Client:
 @router.post("/users", response_model=UserProfile, status_code=201)
 async def create_user(body: UserProfileCreate) -> UserProfile:
     now = datetime.now(timezone.utc).isoformat()
-    user_id = str(uuid.uuid4())
+    user_id = body.user_id or str(uuid.uuid4())
 
-    row = body.model_dump()
+    row = body.model_dump(exclude={"user_id"})
     row["user_id"] = user_id
     row["created_at"] = now
     row["updated_at"] = now
