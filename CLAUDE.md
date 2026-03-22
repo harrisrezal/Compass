@@ -122,6 +122,18 @@ gh pr create --title "..." --body "..."
 - Merging a PR to `main` automatically triggers GitHub Actions to deploy both Cloud Run services
 - After each PR is merged, start the next task on a **new branch from the updated main**
 
+## Cloud Run / Cloud Build IAM (one-time setup)
+
+Both the legacy and current Cloud Build service accounts need these roles on project `waybackhome-whvw1t598hcl0gkc6u`:
+
+| Service Account | Roles |
+|---|---|
+| `649300986983@cloudbuild.gserviceaccount.com` | `run.admin`, `artifactregistry.writer`, `iam.serviceAccountUser`, `storage.admin`, `serviceusage.serviceUsageConsumer` |
+| `649300986983-compute@developer.gserviceaccount.com` | same as above |
+| `compass-deploy@waybackhome-whvw1t598hcl0gkc6u.iam.gserviceaccount.com` | `run.admin`, `artifactregistry.writer`, `iam.serviceAccountUser`, `storage.admin`, `cloudbuild.builds.editor` |
+
+These are already applied — documented here so they're not lost.
+
 ## Conventions
 
 - All BigQuery writes use `client.insert_rows_json()` (streaming insert)
