@@ -5,9 +5,10 @@ import type { ActionPlan } from "@/lib/types";
 
 interface Props {
   plan: ActionPlan;
+  summary?: string;
 }
 
-export default function ActionPlanChecklist({ plan }: Props) {
+export default function ActionPlanChecklist({ plan, summary }: Props) {
   const initial = plan.action_items ?? [];
   const [checked, setChecked] = useState<Record<number, boolean>>(
     () => Object.fromEntries(initial.map((item, i) => [i, item.completed ?? false]))
@@ -20,6 +21,7 @@ export default function ActionPlanChecklist({ plan }: Props) {
   });
 
   const toggle = (i: number) => setChecked((prev) => ({ ...prev, [i]: !prev[i] }));
+  const doneCount = Object.values(checked).filter(Boolean).length;
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 space-y-4">
@@ -28,17 +30,24 @@ export default function ActionPlanChecklist({ plan }: Props) {
           <h2 className="font-bold text-slate-900">Action Plan</h2>
           <p className="text-xs text-slate-400 mt-0.5">Generated {generated}</p>
         </div>
-        {plan.primary_threat && (
+        {items.length > 0 && (
           <span className="text-xs font-medium bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
-            {plan.primary_threat} risk
+            {doneCount}/{items.length} done
           </span>
         )}
       </div>
 
+      {/* Gemini summary */}
+      {summary && (
+        <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 text-sm text-slate-700 leading-relaxed">
+          {summary}
+        </div>
+      )}
+
       {items.length === 0 ? (
         <div className="text-center py-8 text-slate-400">
           <div className="text-3xl mb-2">✅</div>
-          <p className="text-sm">No action plan yet — score below alert threshold.</p>
+          <p className="text-sm">No action items — all hazards are at LOW level.</p>
         </div>
       ) : (
         <div className="space-y-2">

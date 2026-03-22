@@ -17,6 +17,8 @@ class HazardResult(BaseModel):
     level: HazardLevel
     label: str
     action: str
+    reasoning: Optional[str] = None      # Why this level was assigned
+    data_sources: list[str] = []         # Which APIs/datasets contributed
     alert_message: Optional[str] = None  # Gemini-generated; None when LOW
     alert_sent: bool = False
     acknowledged: bool = False
