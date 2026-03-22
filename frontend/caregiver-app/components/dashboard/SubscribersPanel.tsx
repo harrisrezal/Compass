@@ -44,13 +44,6 @@ function getSubscribers(profile: UserProfile): Subscriber[] {
   return subs;
 }
 
-const THRESHOLD_COLOURS: Record<string, string> = {
-  ELEVATED: "bg-orange-100 text-orange-700",
-  HIGH:     "bg-red-100 text-red-700",
-  CRITICAL: "bg-red-200 text-red-800",
-  ALL:      "bg-blue-100 text-blue-700",
-};
-
 export default function SubscribersPanel({ profile }: { profile: UserProfile }) {
   const subs = getSubscribers(profile);
 
@@ -65,16 +58,13 @@ export default function SubscribersPanel({ profile }: { profile: UserProfile }) 
       <div className="space-y-2">
         {subs.map((sub, i) => (
           <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition">
-            <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 shrink-0">
               {sub.avatar}
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-medium text-slate-900 text-sm">{sub.name}</div>
               <div className="text-xs text-slate-400">{sub.role} · {sub.lastActive}</div>
             </div>
-            <span className={`text-xs font-medium px-2 py-0.5 rounded-full flex-shrink-0 ${THRESHOLD_COLOURS[sub.alertLevel] ?? "bg-slate-100 text-slate-500"}`}>
-              {sub.alertLevel}
-            </span>
           </div>
         ))}
       </div>
