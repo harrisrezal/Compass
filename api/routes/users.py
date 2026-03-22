@@ -38,7 +38,7 @@ async def create_user(body: UserProfileCreate) -> UserProfile:
     if errors:
         raise HTTPException(status_code=500, detail=f"BigQuery insert error: {errors}")
 
-    return UserProfile(user_id=user_id, created_at=now, updated_at=now, **body.model_dump())
+    return UserProfile(user_id=user_id, created_at=now, updated_at=now, **body.model_dump(exclude={"user_id"}))
 
 
 def _serialize(obj):
