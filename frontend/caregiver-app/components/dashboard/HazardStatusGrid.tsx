@@ -10,6 +10,7 @@ interface HazardSummary {
 interface Props {
   hazards: Record<string, HazardSummary>;
   lastUpdated?: string;
+  hazardInsights?: Record<string, string>;
 }
 
 const HAZARD_META: Array<{ key: string; icon: string; name: string }> = [
@@ -37,7 +38,7 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-export default function HazardStatusGrid({ hazards, lastUpdated }: Props) {
+export default function HazardStatusGrid({ hazards, lastUpdated, hazardInsights }: Props) {
   const updatedLabel = lastUpdated ? timeAgo(lastUpdated) : null;
 
   return (
@@ -52,14 +53,9 @@ export default function HazardStatusGrid({ hazards, lastUpdated }: Props) {
             className={`rounded-2xl border ${styles.border} ${styles.bg} bg-white p-4 flex flex-col gap-2`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xl">{icon}</span>
-                <span className="text-xs font-semibold text-slate-700">{name}</span>
-              </div>
-              <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${styles.badge}`}>
-                {level}
-              </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xl">{icon}</span>
+              <span className="text-xs font-semibold text-slate-700">{name}</span>
             </div>
 
             {/* Label */}
@@ -67,10 +63,22 @@ export default function HazardStatusGrid({ hazards, lastUpdated }: Props) {
               {h?.label ?? "No data"}
             </p>
 
-            {/* Reasoning */}
-            {h?.reasoning && (
-              <p className="text-xs text-slate-500 leading-snug">
-                {h.reasoning}
+            {/* Prediction / Actual rows */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-400 w-16 shrink-0">Prediction</span>
+                <span className={`px-2 py-0.5 rounded-full font-semibold ${styles.badge}`}>{level}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-slate-400 w-16 shrink-0">Actual</span>
+                <span className={`px-2 py-0.5 rounded-full font-semibold ${styles.badge}`}>{level}</span>
+              </div>
+            </div>
+
+            {/* Gemini insight for non-LOW hazards */}
+            {level !== "LOW" && hazardInsights?.[key] && (
+              <p className="text-xs text-slate-600 bg-slate-50 rounded-lg px-2.5 py-1.5 leading-snug border border-slate-100">
+                {hazardInsights[key]}
               </p>
             )}
 
