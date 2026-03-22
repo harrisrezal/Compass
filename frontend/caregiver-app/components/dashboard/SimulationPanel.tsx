@@ -62,18 +62,22 @@ const RISK_BADGE: Record<string, { dot: string; badge: string; label: string }> 
 export default function SimulationPanel({ initialData, profile, initialCondition, initialBackupHours, userId }: Props) {
   const [data, setData] = useState<SimData>(initialData);
   const [condition, setCondition] = useState(initialCondition);
+  const [zip, setZip] = useState(profile.zip_code);
+  const [zipInput, setZipInput] = useState(profile.zip_code);
   const [loading, setLoading] = useState(false);
   const [predictionLevels, setPredictionLevels] = useState<Record<string, string> | undefined>(undefined);
   const [actualLevels, setActualLevels] = useState<Record<string, string> | undefined>(undefined);
+  const [simulationKey, setSimulationKey] = useState(0);
 
-  const runSimulation = useCallback(async (newCondition: string) => {
+  const runSimulation = useCallback(async (newCondition: string, newZip?: string) => {
     setLoading(true);
+    const effectiveZip = newZip ?? zip;
     try {
       const res = await fetch("/api/simulate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          zip: profile.zip_code,
+          zip: effectiveZip,
           condition: newCondition,
           backupHours: initialBackupHours,
           name: profile.name,
@@ -85,15 +89,23 @@ export default function SimulationPanel({ initialData, profile, initialCondition
         setData(result);
         if (result.prediction) setPredictionLevels(result.prediction);
         if (result.actual) setActualLevels(result.actual);
+        setSimulationKey(k => k + 1);
       }
     } finally {
       setLoading(false);
     }
-  }, [profile, initialBackupHours]);
+  }, [profile, initialBackupHours, zip]);
 
   const handleConditionChange = (newCondition: string) => {
     setCondition(newCondition);
     runSimulation(newCondition);
+  };
+
+  const handleZipSubmit = (newZip: string) => {
+    const trimmed = newZip.trim();
+    if (!trimmed || trimmed === zip) return;
+    setZip(trimmed);
+    runSimulation(condition, trimmed);
   };
 
   // Derive overall risk level
@@ -133,7 +145,7 @@ export default function SimulationPanel({ initialData, profile, initialCondition
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{profile.name}</h1>
           <p className="text-slate-500 text-sm mt-1">
-            {condition.replace("_", " ")} · ZIP {profile.zip_code} · {profile.utility}
+            {condition.replace("_", " ")} · ZIP {zip} · {profile.utility}
           </p>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
@@ -149,26 +161,56 @@ export default function SimulationPanel({ initialData, profile, initialCondition
         </div>
       </div>
 
-      {/* Condition / diagnosis selector */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-4">
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-          Simulate Diagnosis
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {CONDITIONS.map(({ key, label }) => (
-            <button
-              key={key}
-              onClick={() => handleConditionChange(key)}
+      {/* Condition / diagnosis selector + ZIP */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-4">
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Simulate Diagnosis
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {CONDITIONS.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => handleConditionChange(key)}
+                disabled={loading}
+                className={`text-sm px-3 py-1.5 rounded-full font-medium transition disabled:opacity-50 ${
+                  condition === key
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Simulate ZIP Code
+          </p>
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(e) => { e.preventDefault(); handleZipSubmit(zipInput); }}
+          >
+            <input
+              type="text"
+              value={zipInput}
+              onChange={(e) => setZipInput(e.target.value)}
+              onBlur={() => handleZipSubmit(zipInput)}
+              maxLength={5}
+              placeholder="e.g. 93720"
               disabled={loading}
-              className={`text-sm px-3 py-1.5 rounded-full font-medium transition disabled:opacity-50 ${
-                condition === key
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              className="w-28 text-sm px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50"
+            />
+            <button
+              type="submit"
+              disabled={loading}
+              className="text-sm px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition disabled:opacity-50"
             >
-              {label}
+              Update
             </button>
-          ))}
+          </form>
         </div>
       </div>
 
@@ -216,7 +258,7 @@ export default function SimulationPanel({ initialData, profile, initialCondition
       {/* Map + Action Plan / sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <HazardMap mapData={data.map_data} hazardLevels={hazardLevels} />
+          <HazardMap key={simulationKey} mapData={data.map_data} hazardLevels={hazardLevels} />
           <ActionPlanChecklist plan={plan} summary={data.plan?.summary} />
         </div>
         <div className="space-y-4">
