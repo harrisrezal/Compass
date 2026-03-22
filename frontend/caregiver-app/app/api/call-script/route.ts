@@ -62,7 +62,7 @@ ${customNote ? `## Additional instruction from caregiver\n${customNote}` : ""}
 
   try {
     const vertexAI = new VertexAI({ project, location: "us-central1" });
-    const model = vertexAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = vertexAI.getGenerativeModel({ model: "gemini-2.0-flash-001" });
 
     const result = await model.generateContent({
       systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },

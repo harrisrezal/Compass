@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   try {
     const vertexAI = new VertexAI({ project, location: "us-central1" });
     const model = vertexAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.0-flash-001",
       systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
     });
 
