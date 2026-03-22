@@ -47,7 +47,6 @@ const CONDITIONS = [
   { key: "dialysis",         label: "💉 Dialysis" },
   { key: "wheelchair",       label: "♿ Wheelchair" },
   { key: "heat_vulnerable",  label: "🌡️ Heat Vulnerable" },
-  { key: "insulin_dependent", label: "💊 Insulin" },
 ];
 
 const LEVEL_ORDER = ["LOW", "MODERATE", "HIGH", "CRITICAL"] as const;
@@ -98,7 +97,6 @@ export default function SimulationPanel({ initialData, profile, initialCondition
 
   const handleConditionChange = (newCondition: string) => {
     setCondition(newCondition);
-    runSimulation(newCondition);
   };
 
   const handleZipSubmit = (newZip: string) => {

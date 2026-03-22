@@ -126,7 +126,7 @@ export default function OnboardingPage() {
 
         {/* Header */}
         <div className="flex items-center gap-2 mb-8 text-blue-700 font-bold text-lg">
-          🧭 Compass
+          🛡️ Guardian Angel.AI
         </div>
 
         <form onSubmit={handleSubmit} noValidate>

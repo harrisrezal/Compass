@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Compass — AI Medical Emergency Intelligence",
+  title: "Guardian Angel.AI — Medical Emergency Intelligence",
   description: "Protecting medically vulnerable Californians from energy and disaster risks.",
 };
 
