@@ -63,6 +63,8 @@ export default function SimulationPanel({ initialData, profile, initialCondition
   const [data, setData] = useState<SimData>(initialData);
   const [condition, setCondition] = useState(initialCondition);
   const [loading, setLoading] = useState(false);
+  const [predictionLevels, setPredictionLevels] = useState<Record<string, string> | undefined>(undefined);
+  const [actualLevels, setActualLevels] = useState<Record<string, string> | undefined>(undefined);
 
   const runSimulation = useCallback(async (newCondition: string) => {
     setLoading(true);
@@ -81,6 +83,8 @@ export default function SimulationPanel({ initialData, profile, initialCondition
       if (res.ok) {
         const result = await res.json();
         setData(result);
+        if (result.prediction) setPredictionLevels(result.prediction);
+        if (result.actual) setActualLevels(result.actual);
       }
     } finally {
       setLoading(false);
@@ -203,23 +207,23 @@ export default function SimulationPanel({ initialData, profile, initialCondition
             hazards={data.hazards}
             lastUpdated={data.lastUpdated}
             hazardInsights={data.insights}
+            predictionLevels={predictionLevels}
+            actualLevels={actualLevels}
           />
         )}
       </div>
 
-      {/* Map + sidebar */}
+      {/* Map + Action Plan / sidebar */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-4">
           <HazardMap mapData={data.map_data} hazardLevels={hazardLevels} />
+          <ActionPlanChecklist plan={plan} summary={data.plan?.summary} />
         </div>
         <div className="space-y-4">
           <OrganisationsPanel profile={profile} />
           <SubscribersPanel profile={profile} />
         </div>
       </div>
-
-      {/* Action plan */}
-      <ActionPlanChecklist plan={plan} summary={data.plan?.summary} />
 
     </div>
   );

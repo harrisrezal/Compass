@@ -121,6 +121,25 @@ Return ONLY valid JSON with hazard keys in lowercase: ${JSON.stringify(Object.fr
   }
 }
 
+const LEVELS = ["LOW", "MODERATE", "HIGH", "CRITICAL"] as const;
+
+function randomiseHazards(hazards: Record<string, { level: string }>) {
+  const actual: Record<string, string> = {};
+  const prediction: Record<string, string> = {};
+
+  for (const [key, h] of Object.entries(hazards)) {
+    const idx = LEVELS.indexOf(h.level as typeof LEVELS[number]);
+    // Actual: base level, occasionally shift ±1 (30% chance)
+    const actualShift = Math.random() < 0.3 ? (Math.random() < 0.5 ? -1 : 1) : 0;
+    const actualIdx = Math.max(0, Math.min(3, idx + actualShift));
+    actual[key] = LEVELS[actualIdx];
+    // Prediction: always ≥ actual (forecast is worst-case), shift 0 or +1
+    const predShift = Math.floor(Math.random() * 2);
+    prediction[key] = LEVELS[Math.min(3, actualIdx + predShift)];
+  }
+  return { actual, prediction };
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { zip, condition, backupHours, name, age } = await req.json();
@@ -136,6 +155,8 @@ export async function POST(req: NextRequest) {
     const lastUpdated = hazardData.last_updated ?? new Date().toISOString();
     const profile = { name: name ?? "Patient", condition: condition ?? "other", backupHours: backupHours ?? 0, zip_code: zip ?? "00000", age };
 
+    const { actual, prediction } = randomiseHazards(hazardData.hazards);
+
     const [plan, insights] = await Promise.all([
       generateActionPlan(hazardData.hazards, profile, lastUpdated),
       generateHazardInsights(hazardData.hazards, profile),
@@ -147,6 +168,8 @@ export async function POST(req: NextRequest) {
       lastUpdated,
       plan,
       insights,
+      actual,
+      prediction,
     });
   } catch {
     return NextResponse.json({ error: "Simulation failed" }, { status: 500 });
