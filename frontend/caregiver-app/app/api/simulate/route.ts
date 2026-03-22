@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
     const { actual, prediction } = randomiseHazards(hazardData.hazards);
 
     // Derive active_overlays from whichever hazards are non-LOW so the map always matches
-    const activeOverlays = Object.entries(hazardData.hazards)
+    const activeOverlays = Object.entries(hazardData.hazards as Record<string, { level: string }>)
       .filter(([, h]) => h.level !== "LOW")
       .map(([k]) => k);
     const mapData = { ...hazardData.map_data, active_overlays: activeOverlays };
