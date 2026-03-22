@@ -40,7 +40,7 @@ export default function StepCaregiverDetails({ data, onChange, mode }: Props) {
             value={cg.name ?? ""}
             onChange={(e) => update("name", e.target.value)}
             placeholder="Maria Rodriguez"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -51,7 +51,7 @@ export default function StepCaregiverDetails({ data, onChange, mode }: Props) {
             value={cg.relationship ?? ""}
             onChange={(e) => update("relationship", e.target.value)}
             placeholder="Daughter"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -62,7 +62,7 @@ export default function StepCaregiverDetails({ data, onChange, mode }: Props) {
             value={cg.phone ?? ""}
             onChange={(e) => update("phone", e.target.value)}
             placeholder="+14155550182"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
@@ -73,7 +73,7 @@ export default function StepCaregiverDetails({ data, onChange, mode }: Props) {
             value={cg.email ?? ""}
             onChange={(e) => update("email", e.target.value)}
             placeholder="maria@email.com"
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
