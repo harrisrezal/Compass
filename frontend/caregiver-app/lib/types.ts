@@ -52,6 +52,7 @@ export interface UserProfile {
   utility?: Utility;
   medical_baseline_enrolled?: boolean;
   condition?: Condition;
+  other_condition?: string;
   equipment?: Equipment;
   medications?: Medication[];
   can_self_evacuate?: boolean;
