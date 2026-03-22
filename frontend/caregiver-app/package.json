@@ -11,6 +11,7 @@
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.2",
     "@google/generative-ai": "^0.24.1",
+    "@googlemaps/js-api-loader": "^2.0.2",
     "next": "16.2.1",
     "react": "19.2.4",
     "react-dom": "19.2.4"
