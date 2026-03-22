@@ -22,7 +22,7 @@ load_dotenv()  # load GCP_PROJECT_ID etc. from .env
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import users, scores, plans, welfare
+from api.routes import hazards, plans, scores, users, welfare
 
 app = FastAPI(
     title="Compass API",
@@ -41,6 +41,7 @@ app.include_router(users.router)
 app.include_router(scores.router)
 app.include_router(plans.router)
 app.include_router(welfare.router)
+app.include_router(hazards.router)
 
 
 @app.get("/health")
