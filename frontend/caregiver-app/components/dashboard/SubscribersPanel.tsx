@@ -26,9 +26,9 @@ function getSubscribers(profile: UserProfile): Subscriber[] {
   // Mock neighbours for demo
   subs.push(
     {
-      name: "Compass Watch",
+      name: "Guardian Angel.AI Watch",
       role: "AI monitoring",
-      avatar: "🧭",
+      avatar: "🛡️",
       lastActive: "Active",
       alertLevel: "ALL",
     },

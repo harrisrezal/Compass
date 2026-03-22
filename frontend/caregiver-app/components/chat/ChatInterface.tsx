@@ -59,7 +59,7 @@ export default function ChatInterface({ systemPrompt, patientName }: Props) {
           <div className="text-center py-10 space-y-4">
             <div className="text-4xl">🧭</div>
             <div>
-              <p className="font-semibold text-slate-700">Compass is here to help</p>
+              <p className="font-semibold text-slate-700">Guardian Angel.AI is here to help</p>
               <p className="text-sm text-slate-400 mt-1">
                 Ask anything about {patientName}&apos;s current risk or what to do next.
               </p>
@@ -88,7 +88,7 @@ export default function ChatInterface({ systemPrompt, patientName }: Props) {
               }`}
             >
               {msg.role === "model" && (
-                <span className="text-xs text-slate-400 block mb-1">🧭 Compass</span>
+                <span className="text-xs text-slate-400 block mb-1">🛡️ Guardian Angel.AI</span>
               )}
               {msg.parts}
             </div>
@@ -98,7 +98,7 @@ export default function ChatInterface({ systemPrompt, patientName }: Props) {
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-4 py-3">
-              <span className="text-xs text-slate-400 block mb-1">🧭 Compass</span>
+              <span className="text-xs text-slate-400 block mb-1">🛡️ Guardian Angel.AI</span>
               <div className="flex gap-1.5">
                 {[0, 1, 2].map((i) => (
                   <div key={i} className="w-2 h-2 bg-slate-300 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />

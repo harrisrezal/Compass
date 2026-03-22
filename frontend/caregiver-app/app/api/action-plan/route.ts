@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
   const condition = profile.condition ?? "unknown";
   const backupHours = eq.backup_hours != null ? `${eq.backup_hours}h backup` : "no backup specified";
 
-  const prompt = `You are Compass, an AI emergency preparedness assistant for medically vulnerable Californians.
+  const prompt = `You are Guardian Angel.AI, an AI emergency preparedness assistant for medically vulnerable Californians.
 
 Patient profile:
 - Name: ${profile.name ?? "Patient"}

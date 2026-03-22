@@ -12,7 +12,7 @@ function buildSystemPrompt(profile: Record<string, unknown>, score: Record<strin
   const nr = profile.nearest_resources as Record<string, unknown> | undefined;
   const meds = (profile.medications as Array<Record<string, unknown>> | undefined) ?? [];
 
-  return `You are Compass, an AI emergency preparedness advisor for medically vulnerable Californians.
+  return `You are Guardian Angel.AI, an AI emergency preparedness advisor for medically vulnerable Californians.
 You are speaking directly with the caregiver or patient of the following person.
 
 ## Patient
@@ -77,7 +77,7 @@ export default async function ChatPage({ searchParams }: Props) {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       {/* Nav */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between flex-shrink-0">
-        <Link href="/" className="text-blue-700 font-bold text-lg">🧭 Compass</Link>
+        <Link href="/" className="text-blue-700 font-bold text-lg">🛡️ Guardian Angel.AI</Link>
         {userId && (
           <Link
             href={`/dashboard/${userId}`}
@@ -91,7 +91,7 @@ export default async function ChatPage({ searchParams }: Props) {
       {/* Chat title */}
       <div className="bg-white border-b border-slate-100 px-6 py-3 flex-shrink-0">
         <p className="text-sm font-medium text-slate-700">
-          Compass AI · {patientName}
+          Guardian Angel.AI · {patientName}
         </p>
         <p className="text-xs text-slate-400">
           Ask about risks, actions, equipment, or emergency resources

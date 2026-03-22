@@ -143,7 +143,7 @@ export default function MockCallModal({ patient, score, onClose }: Props) {
 
             {/* Who will be called */}
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-2">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Compass will call</p>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Guardian Angel.AI will call</p>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-lg">👤</div>
                 <div>
@@ -172,10 +172,10 @@ export default function MockCallModal({ patient, score, onClose }: Props) {
         {/* GENERATING */}
         {screen === "generating" && (
           <div className="p-10 flex flex-col items-center gap-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl animate-pulse">🧭</div>
+            <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center text-3xl animate-pulse">🛡️</div>
             <div>
               <p className="font-semibold text-slate-900">Preparing alert script…</p>
-              <p className="text-sm text-slate-500 mt-1">Compass is generating a personalised message for {caregiverName}</p>
+              <p className="text-sm text-slate-500 mt-1">Guardian Angel.AI is generating a personalised message for {caregiverName}</p>
             </div>
           </div>
         )}
@@ -185,10 +185,10 @@ export default function MockCallModal({ patient, score, onClose }: Props) {
           <div className="flex flex-col">
             <div className="bg-slate-900 text-white px-6 pt-8 pb-6 flex flex-col items-center gap-2">
               <div className="relative">
-                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-2xl">🧭</div>
+                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-2xl">🛡️</div>
                 <span className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-slate-900 animate-pulse" />
               </div>
-              <p className="font-semibold text-lg">Compass Agent</p>
+              <p className="font-semibold text-lg">Guardian Angel.AI Agent</p>
               <p className="text-slate-400 text-sm">Calling {caregiverName}…</p>
               <p className="text-green-400 text-sm font-mono">{formatTime(elapsed)}</p>
             </div>

@@ -152,7 +152,7 @@ async function generateHazardInsights(
     .map(([key, h]) => `${key.toUpperCase()} (${h.level}): "${h.reasoning ?? h.label}"`)
     .join("\n");
 
-  const prompt = `You are Compass, an AI emergency assistant for medically vulnerable Californians.
+  const prompt = `You are Guardian Angel.AI, an AI emergency assistant for medically vulnerable Californians.
 
 Patient: ${profile.name}, condition: ${profile.condition ?? "unknown"}, equipment: ${eq.type ?? "none"}
 
@@ -190,7 +190,7 @@ async function generateActionPlan(
   const eq = profile.equipment ?? {};
   const backupHours = eq.backup_hours != null ? `${eq.backup_hours}h backup` : "no backup specified";
 
-  const prompt = `You are Compass, an AI emergency preparedness assistant for medically vulnerable Californians.
+  const prompt = `You are Guardian Angel.AI, an AI emergency preparedness assistant for medically vulnerable Californians.
 
 Patient profile:
 - Name: ${profile.name}
@@ -258,7 +258,7 @@ export default async function DashboardPage({ params }: Props) {
     <div className="min-h-screen bg-slate-50">
       {/* Nav */}
       <header className="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-blue-700 font-bold text-lg">🧭 Compass</Link>
+        <Link href="/" className="text-blue-700 font-bold text-lg">🛡️ Guardian Angel.AI</Link>
         <div className="flex items-center gap-3">
           <span className="text-sm text-slate-500">{profile.name}</span>
           <CallButton
@@ -269,7 +269,7 @@ export default async function DashboardPage({ params }: Props) {
             href={`/chat?userId=${userId}`}
             className="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
           >
-            💬 Chat with Compass
+            💬 Chat with Guardian Angel.AI
           </Link>
         </div>
       </header>
