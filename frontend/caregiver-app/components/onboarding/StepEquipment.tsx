@@ -18,7 +18,7 @@ export default function StepEquipment({ data, onChange }: Props) {
       <div>
         <h2 className="text-2xl font-bold text-slate-900">Medical equipment</h2>
         <p className="text-slate-500 mt-1">
-          Details about the primary power-dependent equipment.
+          Indicate the medical devices used at the home.
         </p>
       </div>
 
@@ -47,22 +47,6 @@ export default function StepEquipment({ data, onChange }: Props) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Battery backup (hours)
-            <span className="ml-1 text-slate-400 font-normal">— 0 if none</span>
-          </label>
-          <input
-            type="number"
-            value={eq.backup_hours ?? ""}
-            onChange={(e) => update("backup_hours", parseFloat(e.target.value) || 0)}
-            placeholder="4"
-            min={0}
-            step={0.5}
-            className="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Supplier name</label>
           <input
             type="text"
@@ -85,11 +69,6 @@ export default function StepEquipment({ data, onChange }: Props) {
         </div>
       </div>
 
-      {(eq.backup_hours ?? 0) === 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-700">
-          ⚠️ No backup power — this increases the composite risk score by 30%.
-        </div>
-      )}
     </div>
   );
 }
