@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { api } from "@/lib/api";
-import type { UserProfile, ActionPlan } from "@/lib/types";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { UserProfile, ActionPlan, ActionItem } from "@/lib/types";
 import ActionPlanChecklist from "@/components/dashboard/ActionPlanChecklist";
 import OrganisationsPanel from "@/components/dashboard/OrganisationsPanel";
 import SubscribersPanel from "@/components/dashboard/SubscribersPanel";
@@ -133,22 +133,93 @@ async function fetchHazards(zip: string, medical: boolean): Promise<HazardRespon
   }
 }
 
+interface GeminiPlan {
+  summary: string;
+  items: Array<{ action: string; detail: string }>;
+}
+
+async function generateActionPlan(
+  hazards: Record<string, { level: string; label: string }>,
+  profile: UserProfile,
+  lastUpdated: string,
+): Promise<GeminiPlan | null> {
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) return null;
+
+  const hazardLines = Object.entries(hazards)
+    .map(([key, h]) => `- ${key.toUpperCase()}: ${h.level} — ${h.label}`)
+    .join("\n");
+
+  const eq = profile.equipment ?? {};
+  const backupHours = eq.backup_hours != null ? `${eq.backup_hours}h backup` : "no backup specified";
+
+  const prompt = `You are Compass, an AI emergency preparedness assistant for medically vulnerable Californians.
+
+Patient profile:
+- Name: ${profile.name}
+- Condition: ${profile.condition ?? "unknown"}
+- Equipment: ${eq.type ?? "none"} (${backupHours})
+- ZIP: ${profile.zip_code}
+- Utility: ${profile.utility ?? "unknown"}
+
+Current hazard status (as of ${lastUpdated}):
+${hazardLines}
+
+Generate a personalised emergency action plan. Return ONLY valid JSON:
+{
+  "summary": "2–3 sentence plain-English overview of the current risk and the single most important thing this patient must do given their medical condition",
+  "items": [
+    { "action": "Short action title", "detail": "One specific sentence tailored to this patient's condition and equipment" }
+  ]
+}
+
+Rules:
+- 5–8 items ordered by urgency
+- Focus on ${profile.condition ?? "the patient's condition"} and HIGH/CRITICAL hazards
+- Reference specific equipment, backup hours, nearest hospital where relevant
+- Skip actions for LOW hazards unless they affect the medical condition
+- Return only the JSON object, no markdown`;
+
+  try {
+    const genai = new GoogleGenerativeAI(apiKey);
+    const model = genai.getGenerativeModel({
+      model: "gemini-2.5-flash",
+      generationConfig: { responseMimeType: "application/json" },
+    });
+    const result = await model.generateContent(prompt);
+    return JSON.parse(result.response.text().trim()) as GeminiPlan;
+  } catch {
+    return null;
+  }
+}
+
 export default async function DashboardPage({ params }: Props) {
   const { userId } = await params;
 
   const profile: UserProfile = DEMO_PROFILES[userId] ?? { user_id: userId, name: "Patient", zip_code: "00000" };
   const medical = ["oxygen", "ventilator", "dialysis"].includes(profile.condition ?? "");
 
-  const [planResult, hazardResult] = await Promise.allSettled([
-    api.getPlan(userId),
-    fetchHazards(profile.zip_code, medical),
-  ]);
-
-  const plan: ActionPlan = planResult.status === "fulfilled" ? planResult.value : { ...DEMO_PLAN, user_id: userId };
+  const hazardResult = await fetchHazards(profile.zip_code, medical);
   const hazardData: HazardResponse =
-    (hazardResult.status === "fulfilled" && hazardResult.value)
-      ? hazardResult.value
-      : (DEMO_HAZARDS[userId] ?? DEMO_HAZARDS["demo-user-margaret-001"]);
+    hazardResult ?? (DEMO_HAZARDS[userId] ?? DEMO_HAZARDS["demo-user-margaret-001"]);
+
+  // Generate Gemini action plan based on live hazard data + medical profile
+  const geminiPlan = await generateActionPlan(hazardData.hazards, profile, hazardData.last_updated);
+
+  // Build ActionPlan from Gemini output (or fall back to static demo plan)
+  const plan: ActionPlan = geminiPlan
+    ? {
+        plan_id: "gemini",
+        user_id: userId,
+        generated_at: hazardData.last_updated,
+        action_items: geminiPlan.items.map((item, i): ActionItem => ({
+          order: i + 1,
+          action: item.action,
+          detail: item.detail,
+          completed: false,
+        })),
+      }
+    : { ...DEMO_PLAN, user_id: userId };
 
   const hazardLevels = Object.fromEntries(
     Object.entries(hazardData.hazards).map(([k, v]) => [k, v.level])
@@ -184,7 +255,7 @@ export default async function DashboardPage({ params }: Props) {
         </div>
 
         {/* Hazard status cards — full width */}
-        <HazardStatusGrid hazards={hazardData.hazards} />
+        <HazardStatusGrid hazards={hazardData.hazards} lastUpdated={hazardData.last_updated} />
 
         {/* Map + sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -200,7 +271,7 @@ export default async function DashboardPage({ params }: Props) {
         {/* Action plan */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <ActionPlanChecklist plan={plan} />
+            <ActionPlanChecklist plan={plan} summary={geminiPlan?.summary} />
           </div>
         </div>
       </main>
