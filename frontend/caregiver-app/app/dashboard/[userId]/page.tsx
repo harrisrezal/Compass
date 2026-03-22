@@ -8,8 +8,10 @@ interface Props {
   params: Promise<{ userId: string }>;
 }
 
+type HazardLevel = "LOW" | "MODERATE" | "HIGH" | "CRITICAL";
+
 interface HazardSummary {
-  level: string;
+  level: HazardLevel;
   label: string;
   action?: string;
   reasoning?: string;
