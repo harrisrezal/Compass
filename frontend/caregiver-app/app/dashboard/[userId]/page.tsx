@@ -30,7 +30,7 @@ interface HazardMapData {
 interface HazardResponse {
   hazards: Record<string, HazardSummary>;
   map_data: HazardMapData;
-  last_updated: string;
+  last_updated?: string;
 }
 
 // Demo user profiles for fallback when BQ has no profile record
@@ -205,14 +205,15 @@ export default async function DashboardPage({ params }: Props) {
     hazardResult ?? (DEMO_HAZARDS[userId] ?? DEMO_HAZARDS["demo-user-margaret-001"]);
 
   // Generate Gemini action plan based on live hazard data + medical profile
-  const geminiPlan = await generateActionPlan(hazardData.hazards, profile, hazardData.last_updated);
+  const lastUpdated = hazardData.last_updated ?? new Date().toISOString();
+  const geminiPlan = await generateActionPlan(hazardData.hazards, profile, lastUpdated);
 
   // Build ActionPlan from Gemini output (or fall back to static demo plan)
   const plan: ActionPlan = geminiPlan
     ? {
         plan_id: "gemini",
         user_id: userId,
-        generated_at: hazardData.last_updated,
+        generated_at: lastUpdated,
         action_items: geminiPlan.items.map((item, i): ActionItem => ({
           order: i + 1,
           action: item.action,
@@ -256,7 +257,7 @@ export default async function DashboardPage({ params }: Props) {
         </div>
 
         {/* Hazard status cards — full width */}
-        <HazardStatusGrid hazards={hazardData.hazards} lastUpdated={hazardData.last_updated} />
+        <HazardStatusGrid hazards={hazardData.hazards} lastUpdated={lastUpdated} />
 
         {/* Map + sidebar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
