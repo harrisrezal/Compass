@@ -130,34 +130,39 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
         (k) => hazardLevels[k] === "HIGH" || hazardLevels[k] === "CRITICAL"
       );
 
-      if (highOrCritical.length > 0 && typeof google !== "undefined") {
-        const service = new google.maps.places.PlacesService(map);
+      if (highOrCritical.length > 0) {
         const resourceTypes = [
-          { type: "hospital", icon: "🏥", label: "Hospital" },
-          { type: "gas_station", icon: "⛽", label: "Gas Station" },
+          { includedType: "hospital",     icon: "🏥" },
+          { includedType: "gas_station",  icon: "⛽" },
         ];
 
-        resourceTypes.forEach(({ type, icon, label }) => {
-          service.nearbySearch(
-            { location: { lat, lng }, radius: 10000, type },
-            (results, status) => {
-              if (status === google.maps.places.PlacesServiceStatus.OK && results) {
-                results.slice(0, 3).forEach((place) => {
-                  if (!place.geometry?.location) return;
-                  const markerEl = document.createElement("div");
-                  markerEl.style.cssText =
-                    "font-size:20px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35))";
-                  markerEl.textContent = icon;
-                  new google.maps.marker.AdvancedMarkerElement({
-                    position: place.geometry.location,
-                    map,
-                    title: `${icon} ${place.name}`,
-                    content: markerEl,
-                  });
-                });
-              }
-            }
-          );
+        resourceTypes.forEach(async ({ includedType, icon }) => {
+          try {
+            const { places } = await google.maps.places.Place.searchNearby({
+              fields: ["displayName", "location"],
+              includedTypes: [includedType],
+              locationRestriction: {
+                center: { lat, lng },
+                radius: 10000,
+              },
+              maxResultCount: 3,
+            });
+            places.forEach((place) => {
+              if (!place.location) return;
+              const markerEl = document.createElement("div");
+              markerEl.style.cssText =
+                "font-size:20px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35))";
+              markerEl.textContent = icon;
+              new google.maps.marker.AdvancedMarkerElement({
+                position: place.location,
+                map,
+                title: `${icon} ${place.displayName}`,
+                content: markerEl,
+              });
+            });
+          } catch {
+            // Places search is best-effort — silently skip if unavailable
+          }
         });
       }
 
