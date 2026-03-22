@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+  REGISTRY: us-central1-docker.pkg.dev
+
 jobs:
   deploy-backend:
     name: Deploy FastAPI Backend
@@ -24,15 +29,25 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - name: Build and push backend image
+        run: |
+          IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/cloud-run-source-deploy/compass-api:${{ github.sha }}
+          docker build -f Dockerfile -t $IMAGE .
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
       - name: Deploy backend to Cloud Run
         run: |
           gcloud run deploy compass-api \
-            --source . \
-            --region us-central1 \
+            --image $IMAGE \
+            --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-env-vars "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }},BQ_DATASET=vitaguard,BQ_LOCATION=us-central1,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
-            --project ${{ secrets.GCP_PROJECT_ID }}
+            --set-env-vars "GCP_PROJECT_ID=${{ env.PROJECT_ID }},BQ_DATASET=vitaguard,BQ_LOCATION=us-central1,GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
+            --project ${{ env.PROJECT_ID }}
 
   deploy-frontend:
     name: Deploy Next.js Frontend
@@ -53,13 +68,26 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - name: Build and push frontend image
+        run: |
+          IMAGE=${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/cloud-run-source-deploy/compass-frontend:${{ github.sha }}
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_URL }} \
+            -f frontend/caregiver-app/Dockerfile \
+            frontend/caregiver-app \
+            -t $IMAGE
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
       - name: Deploy frontend to Cloud Run
         run: |
           gcloud run deploy compass-frontend \
-            --source frontend/caregiver-app \
-            --region us-central1 \
+            --image $IMAGE \
+            --region ${{ env.REGION }} \
             --platform managed \
             --allow-unauthenticated \
-            --set-build-env-vars "NEXT_PUBLIC_API_URL=${{ secrets.BACKEND_URL }}" \
             --set-env-vars "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" \
-            --project ${{ secrets.GCP_PROJECT_ID }}
+            --project ${{ env.PROJECT_ID }}
