@@ -66,16 +66,18 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
       importLibrary("maps"),
       importLibrary("places"),
       importLibrary("routes"),
+      importLibrary("marker"),
     ]).then(() => {
       if (!mapRef.current) return;
 
       const [lat, lng] = mapData.user_lat_lng;
 
+      // mapId is required for AdvancedMarkerElement
       const map = new google.maps.Map(mapRef.current, {
         center: { lat, lng },
         zoom: 11,
+        mapId: "DEMO_MAP_ID",
         mapTypeId: "roadmap",
-        styles: [{ featureType: "poi", stylers: [{ visibility: "off" }] }],
         disableDefaultUI: false,
         zoomControl: true,
         mapTypeControl: false,
@@ -84,18 +86,14 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
       googleMapRef.current = map;
 
       // User location pin
-      new google.maps.Marker({
+      const pinEl = document.createElement("div");
+      pinEl.style.cssText =
+        "width:18px;height:18px;border-radius:50%;background:#1E40AF;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4)";
+      new google.maps.marker.AdvancedMarkerElement({
         position: { lat, lng },
         map,
         title: "Your Location",
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          fillColor: "#1E40AF",
-          fillOpacity: 1,
-          strokeColor: "#fff",
-          strokeWeight: 2,
-          scale: 10,
-        },
+        content: pinEl,
       });
 
       // Draw hazard radius circles as overlay proxies
@@ -146,19 +144,15 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
               if (status === google.maps.places.PlacesServiceStatus.OK && results) {
                 results.slice(0, 3).forEach((place) => {
                   if (!place.geometry?.location) return;
-                  new google.maps.Marker({
+                  const markerEl = document.createElement("div");
+                  markerEl.style.cssText =
+                    "font-size:20px;line-height:1;cursor:pointer;filter:drop-shadow(0 1px 3px rgba(0,0,0,0.35))";
+                  markerEl.textContent = icon;
+                  new google.maps.marker.AdvancedMarkerElement({
                     position: place.geometry.location,
                     map,
                     title: `${icon} ${place.name}`,
-                    label: { text: icon, fontSize: "18px" },
-                    icon: {
-                      path: google.maps.SymbolPath.CIRCLE,
-                      fillColor: "#FFFFFF",
-                      fillOpacity: 0.9,
-                      strokeColor: "#374151",
-                      strokeWeight: 1,
-                      scale: 12,
-                    },
+                    content: markerEl,
                   });
                 });
               }
