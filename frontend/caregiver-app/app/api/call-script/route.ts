@@ -1,4 +1,4 @@
-import { VertexAI } from "@google-cloud/vertexai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextRequest, NextResponse } from "next/server";
 
 const PURPOSE_PROMPTS: Record<string, string> = {
@@ -15,9 +15,9 @@ Cover: (1) state there is an active emergency (Red Flag / PSPS / flood warning),
 export async function POST(req: NextRequest) {
   const { purpose, customNote, patient, score } = await req.json();
 
-  const project = process.env.GCP_PROJECT_ID?.trim();
-  if (!project) {
-    return NextResponse.json({ error: "GCP_PROJECT_ID not configured" }, { status: 500 });
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
+  if (!apiKey) {
+    return NextResponse.json({ error: "GEMINI_API_KEY not configured" }, { status: 500 });
   }
 
   const purposePrompt = PURPOSE_PROMPTS[purpose];
@@ -61,19 +61,18 @@ ${customNote ? `## Additional instruction from caregiver\n${customNote}` : ""}
 - Do NOT include stage directions or labels like "Agent:" — just the spoken words`;
 
   try {
-    const vertexAI = new VertexAI({ project, location: "us-central1" });
-    const model = vertexAI.getGenerativeModel({ model: "gemini-2.0-flash-001" });
-
-    const result = await model.generateContent({
-      systemInstruction: { role: "system", parts: [{ text: systemPrompt }] },
-      contents: [{ role: "user", parts: [{ text: "Generate the call script now." }] }],
+    const genai = new GoogleGenerativeAI(apiKey);
+    const model = genai.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      systemInstruction: systemPrompt,
     });
 
-    const script = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? "Unable to generate script.";
+    const result = await model.generateContent("Generate the call script now.");
+    const script = result.response.text();
     return NextResponse.json({ script });
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
-    console.error("Vertex AI error:", message);
+    console.error("Gemini error:", message);
     return NextResponse.json({ error: `Script generation failed: ${message}` }, { status: 500 });
   }
 }
