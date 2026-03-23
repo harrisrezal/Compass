@@ -149,6 +149,26 @@ Return ONLY valid JSON with hazard keys in lowercase: ${JSON.stringify(Object.fr
 
 type HazardEntry = { level: string; label: string; action?: string; reasoning?: string; data_sources?: string[] };
 
+function buildFallbackPlan(
+  hazards: Record<string, HazardEntry>,
+  profile: { name: string; condition: string },
+): { summary: string; items: Array<{ action: string; detail: string }> } | null {
+  const active = Object.entries(hazards).filter(([, h]) => h.level !== "LOW");
+  if (active.length === 0) return null;
+
+  const items = active.map(([, h]) => ({
+    action: h.action ?? `Address ${h.label}`,
+    detail: h.reasoning ?? h.label,
+  }));
+
+  const topLevel = active[0][1].level;
+  const summary =
+    `${profile.name} faces ${active.length} active hazard${active.length > 1 ? "s" : ""} (${topLevel}). ` +
+    `Review the action items below and follow guidance from your caregiver and local emergency services.`;
+
+  return { summary, items };
+}
+
 const LEVELS = ["LOW", "MODERATE", "HIGH", "CRITICAL"] as const;
 
 /** Keep only the top-2 non-LOW hazards; force the rest to LOW. */
@@ -214,10 +234,11 @@ export async function POST(req: NextRequest) {
       .map(([k]) => k);
     const mapData = { ...hazardData.map_data, active_overlays: activeOverlays };
 
-    const [plan, insights] = await Promise.all([
+    const [geminiPlan, insights] = await Promise.all([
       generateActionPlan(cappedHazards, profile, lastUpdated),
       generateHazardInsights(cappedHazards, profile),
     ]);
+    const plan = geminiPlan ?? buildFallbackPlan(cappedHazards, profile);
 
     return NextResponse.json({
       hazards: cappedHazards,
