@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
+// Known demo ZIP → lat/lng lookup (used when backend is unreachable)
+const ZIP_COORDS: Record<string, [number, number]> = {
+  "93720": [36.8034, -119.7195],  // Fresno
+  "95969": [39.7596, -121.6219],  // Paradise
+  "90034": [34.0211, -118.4001],  // LA / Culver City
+  "94103": [37.7749, -122.4194],  // San Francisco
+  "92101": [32.7157, -117.1611],  // San Diego
+  "95814": [38.5816, -121.4944],  // Sacramento
+};
+
+async function geocodeZip(zip: string): Promise<[number, number]> {
+  if (ZIP_COORDS[zip]) return ZIP_COORDS[zip];
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  if (apiKey) {
+    try {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(zip + " CA")}&key=${apiKey}`
+      );
+      const data = await res.json();
+      const loc = data?.results?.[0]?.geometry?.location;
+      if (loc?.lat && loc?.lng) return [loc.lat as number, loc.lng as number];
+    } catch { /* fall through */ }
+  }
+  return [36.8034, -119.7195]; // default to Fresno
+}
+
 // Fallback demo data if backend is unreachable
 const FALLBACK_HAZARDS = {
   psps:       { level: "CRITICAL", label: "Active PSPS Alert",  action: "Use backup power now",   reasoning: "An active public safety power shutoff is confirmed in effect for this address." },
@@ -164,10 +190,13 @@ export async function POST(req: NextRequest) {
     const { zip, condition, backupHours, name, age } = await req.json();
 
     const medical = ["oxygen", "ventilator", "dialysis"].includes(condition ?? "");
-    const hazardResult = await fetchHazards(zip, medical);
+    const [hazardResult, fallbackLatLng] = await Promise.all([
+      fetchHazards(zip, medical),
+      geocodeZip(zip ?? "93720"),
+    ]);
     const hazardData = hazardResult ?? {
       hazards: FALLBACK_HAZARDS,
-      map_data: FALLBACK_MAP,
+      map_data: { ...FALLBACK_MAP, user_lat_lng: fallbackLatLng },
       last_updated: new Date().toISOString(),
     };
 
