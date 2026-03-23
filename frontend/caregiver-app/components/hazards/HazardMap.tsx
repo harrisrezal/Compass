@@ -46,10 +46,32 @@ const RADIUS_KM: Record<string, number> = {
   earthquake: 20,
 };
 
+/**
+ * Per-hazard directional offsets for circle centers.
+ * At multiplier=1 (HIGH), these are ~3–5 km off the user pin.
+ * At multiplier=4 (MODERATE), these are ~12–20 km off — circle may not enclose the pin.
+ * At multiplier=0 (CRITICAL), circle is dead-center on the user pin.
+ */
+const HAZARD_OFFSETS: Record<string, { latDelta: number; lngDelta: number }> = {
+  psps:       { latDelta:  0.00,  lngDelta:  0.00 },
+  wildfire:   { latDelta:  0.04,  lngDelta:  0.05 },
+  flood:      { latDelta: -0.03,  lngDelta:  0.03 },
+  heat:       { latDelta:  0.02,  lngDelta: -0.04 },
+  earthquake: { latDelta: -0.05,  lngDelta: -0.02 },
+};
+
+const LEVEL_OFFSET_MULTIPLIER: Record<HazardLevel, number> = {
+  CRITICAL: 0,  // at user pin — hitting NOW
+  HIGH:     1,  // small offset — confirmed for area
+  MODERATE: 4,  // larger offset — may affect area, user may be outside circle
+  LOW:      0,  // no circle
+};
+
 export default function HazardMap({ mapData, hazardLevels }: Props) {
   const mapRef = useRef<HTMLDivElement>(null);
   const googleMapRef = useRef<google.maps.Map | null>(null);
   const mapsReadyRef = useRef(false);
+  const userPinRef = useRef<google.maps.marker.AdvancedMarkerElement | null>(null);
   const [visibleLayers, setVisibleLayers] = useState<Record<string, boolean>>(
     () => Object.fromEntries(mapData.active_overlays.map((k) => [k, true]))
   );
@@ -96,11 +118,11 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
       googleMapRef.current = map;
       mapsReadyRef.current = true;
 
-      // User location pin
+      // User location pin — stored in ref so it can be repositioned later
       const pinEl = document.createElement("div");
       pinEl.style.cssText =
         "width:18px;height:18px;border-radius:50%;background:#1E40AF;border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.4)";
-      new google.maps.marker.AdvancedMarkerElement({
+      userPinRef.current = new google.maps.marker.AdvancedMarkerElement({
         position: { lat, lng },
         map,
         title: "Your Location",
@@ -166,16 +188,22 @@ export default function HazardMap({ mapData, hazardLevels }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Re-center and redraw circles when mapData or hazardLevels change after initial load
+  // Re-center map, reposition pin, and redraw circles when mapData or hazardLevels change
   useEffect(() => {
     if (!mapsReadyRef.current || !googleMapRef.current) return;
     const [lat, lng] = mapData.user_lat_lng;
+
+    // Re-center map viewport
     googleMapRef.current.setCenter({ lat, lng });
 
-    // Remove stale circles
+    // Reposition user pin
+    if (userPinRef.current) {
+      userPinRef.current.position = { lat, lng };
+    }
+
+    // Remove stale circles and redraw
     Object.values(circlesRef.current).forEach((c) => c.setMap(null));
     circlesRef.current = {};
-
     drawCircles(googleMapRef.current, mapData.active_overlays, hazardLevels, mapData.user_lat_lng, circlesRef.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapData.user_lat_lng, mapData.active_overlays, hazardLevels]);
@@ -241,6 +269,13 @@ function drawCircles(
   activeOverlays.forEach((hazardKey) => {
     const level = hazardLevels[hazardKey] ?? "LOW";
     if (level === "LOW") return;
+
+    // Offset circle center based on level so hazards don't always sit on the user pin
+    const baseOffset = HAZARD_OFFSETS[hazardKey] ?? { latDelta: 0, lngDelta: 0 };
+    const mult = LEVEL_OFFSET_MULTIPLIER[level] ?? 0;
+    const circleLat = lat + baseOffset.latDelta * mult;
+    const circleLng = lng + baseOffset.lngDelta * mult;
+
     const circle = new google.maps.Circle({
       strokeColor: OVERLAY_COLORS[level],
       strokeOpacity: 0.8,
@@ -248,7 +283,7 @@ function drawCircles(
       fillColor: OVERLAY_COLORS[level],
       fillOpacity: OVERLAY_OPACITY[level],
       map,
-      center: { lat, lng },
+      center: { lat: circleLat, lng: circleLng },
       radius: (RADIUS_KM[hazardKey] ?? 10) * 1000,
     });
     circlesOut[hazardKey] = circle;
