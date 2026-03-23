@@ -47,7 +47,7 @@ export default function ActionPlanChecklist({ plan, summary }: Props) {
       {items.length === 0 ? (
         <div className="text-center py-8 text-slate-400">
           <div className="text-3xl mb-2">✅</div>
-          <p className="text-sm">No action items — all hazards are at LOW level.</p>
+          <p className="text-sm">No active hazards — all clear in your area.</p>
         </div>
       ) : (
         <div className="space-y-2">
