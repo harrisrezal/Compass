@@ -193,6 +193,11 @@ function randomiseHazards(hazards: Record<string, { level: string }>) {
   const prediction: Record<string, string> = {};
 
   for (const [key, h] of Object.entries(hazards)) {
+    if (h.level === "LOW") {
+      actual[key] = "LOW";
+      prediction[key] = "LOW";
+      continue;
+    }
     const idx = LEVELS.indexOf(h.level as typeof LEVELS[number]);
     // Actual: base level, occasionally shift ±1 (30% chance)
     const actualShift = Math.random() < 0.3 ? (Math.random() < 0.5 ? -1 : 1) : 0;
